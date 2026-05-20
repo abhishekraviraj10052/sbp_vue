@@ -1,0 +1,167 @@
+<template>
+    <!-- breadcrumb -->
+    <div class="breadcrumb-header justify-content-between">
+        <BreadCrumb
+            :crumb_data="['my apps', '#' + whmcs_service_id + ' ' + app_name, 'maindashboard', 'announcement', 'list']"
+            url="announcement-manage"
+            :add_btn="true"
+        ></BreadCrumb>
+        <div class="justify-content-center mt-10">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item tx-15">
+                    <a
+                        href="javascript:void(0);"
+                        class="btn btn-primary text-white"
+                        v-on:click="
+                            () => {
+                                this.$router.push({
+                                    name: 'announcement-manage',
+                                });
+                            }
+                        "
+                        ><i class="fa fa-plus"></i>&nbsp&nbspADD</a
+                    >
+                </li>
+            </ol>
+        </div>
+    </div>
+    <!-- /breadcrumb -->
+
+    <!-- row -->
+    <div class="row">
+        <div class="col-xl-12">
+            <SuccessMessage
+                v-if="success_msg"
+                :success_msg="success_msg"
+            ></SuccessMessage>
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex justify-content-between">
+                        <!-- <h4 class="card-title mg-b-0">My Apps</h4> -->
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table
+                            class="table table-bordered table-hover mb-0 text-md-nowrap"
+                        >
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Message</th>
+                                    <th>Created On</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody v-if="records.length == 0">
+                                <tr v-if="isLoading">
+                                    <td colspan="5" class="text-center">
+                                        <div
+                                            class="spinner-border text-primary"
+                                            role="status"
+                                        >
+                                            <span class="sr-only text-dark"
+                                                >Loading...</span
+                                            >
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr v-else>
+                                    <td colspan="5" class="text-center">
+                                        No records found
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tbody v-else>
+                                <tr v-if="isLoading">
+                                    <td colspan="5" class="text-center">
+                                        <div
+                                            class="spinner-border text-primary"
+                                            role="status"
+                                        >
+                                            <span class="sr-only text-dark"
+                                                >Loading...</span
+                                            >
+                                        </div>
+                                    </td>
+                                </tr>
+                                <AnnouncementRecords
+                                    v-else
+                                    :records="records"
+                                    :delete="delete"
+                                ></AnnouncementRecords>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- row closed -->
+</template>
+
+<script>
+import axios from "axios";
+import { useMessageStore } from "../stores/messageStore";
+import { useAuthStore } from "@/stores/auth";
+import BreadCrumb from "../components/bread_crumb/BreadCrumb.vue";
+import SuccessMessage from "../components/success_alert/SuccessMessage.vue";
+import AnnouncementRecords from "../components/AnnouncementRecords.vue";
+
+export default {
+    name: "AnnouncementList",
+    components: {
+        BreadCrumb,
+        SuccessMessage,
+        AnnouncementRecords,
+    },
+    data() {
+        return {
+
+            whmcs_service_id: "",
+            app_name: "",
+            isLoading: true,
+            success_msg: "",
+            records: [],
+        };
+    },
+    methods: {
+        delete(id) {
+            axios
+                .post("/admin/announcement-delete", {
+                    id: id,
+                })
+                .then((res) => {
+                    if (!res.data.errors) {
+                        this.success_msg = res.data.msg;
+                        this.records = this.records.filter((record) => {
+                            if (record.id != id) {
+                                return record;
+                            }
+                        });
+                    }
+                });
+        },
+    },
+
+    mounted() {
+
+        const auth = useAuthStore();
+        this.whmcs_service_id = auth.whmcs_service_id;
+        this.app_name = auth.appName;
+
+        this.isLoading = true;
+        const success = useMessageStore();
+        if (success.message) {
+            this.has_success = true;
+            this.success_msg = success.message;
+            success.clearMessage();
+        }
+        axios.post("/admin/announcement-list").then((res) => {
+            this.records = res.data.records.data;
+            this.isLoading = false;
+        });
+    },
+};
+</script>

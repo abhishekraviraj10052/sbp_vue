@@ -1,0 +1,98 @@
+<?php
+
+namespace App\Http\Controllers\admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class LoginController extends Controller
+{
+    public function login(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            "email" => "required|email",
+            "password" => "required"
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "errors" => true,
+                "msg" => $validator->errors()
+            ]);
+        }
+
+
+        if (Auth::attempt(['email' => $request['email'], 'password' => $request['password']])) {
+            return response()->json([
+                "errors" => false,
+                "user" => Auth::user()
+            ]);
+        } else {
+            return response()->json([
+                "errors" => true,
+                "msg" => ["auth_error" => "Invalid email or password"]
+            ]);
+        }
+    }
+
+
+    public function authCheck(Request $request)
+    {
+        if (Auth::check()) {
+            return response()->json([
+                "errors" => false,
+                "user" => Auth::user()
+            ]);
+        } else {
+            return response()->json([
+                "errors" => true,
+                "user" => null
+            ]);
+        }
+    }
+
+    public function getServiceId(Request $request)
+    {
+        if ($request->session()->has('whmcs_service_id')) {
+            return response()->json([
+                "errors" => false,
+                "whmcs_service_id" => $request->session()->get('whmcs_service_id')
+            ]);
+        } else {
+            return response()->json([
+                "errors" => true,
+                "whmcs_service_id" => null
+            ]);
+        }
+    }
+
+    public function getAppName(Request $request)
+    {
+        if ($request->session()->has('app_name')) {
+            return response()->json([
+                "errors" => false,
+                "app_name" => $request->session()->get('app_name')
+            ]);
+        } else {
+            return response()->json([
+                "errors" => true,
+                "app_name" => null
+            ]);
+        }
+    }
+
+
+
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return response()->json([
+            "errors" => false,
+            "msg" => "done"
+        ]);
+    }
+}

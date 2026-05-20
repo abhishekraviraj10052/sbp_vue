@@ -1,0 +1,159 @@
+<template>
+    <!-- breadcrumb -->
+    <div class="breadcrumb-header justify-content-between">
+        <BreadCrumb
+            :crumb_data="['my apps', 'maindashboard', 'vpn', 'list']"
+            url="vpn-manage"
+            :add_btn="true"
+        ></BreadCrumb>
+        <div class="justify-content-center mt-10">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item tx-15">
+                    <a
+                        href="javascript:void(0);"
+                        class="btn btn-primary text-white"
+                        v-on:click="
+                            () => {
+                                this.$router.push({
+                                    name: 'vpn-manage',
+                                });
+                            }
+                        "
+                        ><i class="fa fa-plus"></i>&nbsp&nbspADD</a
+                    >
+                </li>
+            </ol>
+        </div>
+    </div>
+    <!-- /breadcrumb -->
+
+    <!-- row -->
+    <div class="row">
+        <div class="col-xl-12">
+            <SuccessMessage
+                v-if="success_msg"
+                :success_msg="success_msg"
+            ></SuccessMessage>
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex justify-content-between">
+                        <!-- <h4 class="card-title mg-b-0">My Apps</h4> -->
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table
+                            class="table table-bordered table-hover mb-0 text-md-nowrap"
+                        >
+                            <thead>
+                                <tr>
+                                    <th class="text-center">ID</th>
+                                    <th class="text-center">Title</th>
+                                    <th class="text-center">Username</th>
+                                    <th class="text-center">Password</th>
+                                    <th class="text-center">Created On</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody v-if="records.length == 0">
+                                <tr v-if="isLoading">
+                                    <td colspan="5" class="text-center">
+                                        <div
+                                            class="spinner-border text-primary"
+                                            role="status"
+                                        >
+                                            <span class="sr-only text-dark"
+                                                >Loading...</span
+                                            >
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr v-else>
+                                    <td colspan="5" class="text-center">
+                                        No records found
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tbody v-else>
+                                <tr v-if="isLoading">
+                                    <td colspan="5" class="text-center">
+                                        <div
+                                            class="spinner-border text-primary"
+                                            role="status"
+                                        >
+                                            <span class="sr-only text-dark"
+                                                >Loading...</span
+                                            >
+                                        </div>
+                                    </td>
+                                </tr>
+                                <VpnRecords
+                                    v-else
+                                    :records="records"
+                                    :delete="delete"
+                                ></VpnRecords>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- row closed -->
+</template>
+
+<script>
+import axios from "axios";
+import { useMessageStore } from "../stores/messageStore";
+
+import BreadCrumb from "../components/bread_crumb/BreadCrumb.vue";
+import SuccessMessage from "../components/success_alert/SuccessMessage.vue";
+import VpnRecords from "../components/VpnRecords.vue";
+
+export default {
+    name: "VpnList",
+    components: {
+        BreadCrumb,
+        SuccessMessage,
+        VpnRecords,
+    },
+    data() {
+        return {
+            isLoading: false,
+            success_msg: "",
+            records: [],
+        };
+    },
+    methods: {
+        delete(id) {
+            axios
+                .post("/admin/vpn-delete", {
+                    id: id,
+                })
+                .then((res) => {
+                    if (!res.data.errors) {
+                        this.success_msg = res.data.msg;
+                        this.records = this.records.filter((record) => {
+                            if (record.id != id) {
+                                return record;
+                            }
+                        });
+                    }
+                });
+        },
+    },
+    mounted() {
+        this.isLoading = true;
+        const success = useMessageStore();
+        if (success.message) {
+            this.has_success = true;
+            this.success_msg = success.message;
+            success.clearMessage();
+        }
+        axios.post("/admin/vpn-list").then((res) => {
+            this.records = res.data.records.data;
+            this.isLoading = false;
+        });
+    },
+};
+</script>

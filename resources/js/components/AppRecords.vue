@@ -1,0 +1,85 @@
+<template>
+    <tr v-for="(record, index) in records" :key="index">
+        <th
+            scope="row"
+            class="cursor-pointer"
+            v-on:click="this.redirectToAppDetail(record.id,record.title)"
+        >
+            #{{ record.id }}
+        </th>
+        <td
+            class="cursor-pointer"
+            v-on:click="this.redirectToAppDetail(record.id,record.title)"
+        >
+            {{ record.title }}
+        </td>
+        <td>{{ record.type }}</td>
+        <td>{{ record.created_at }}</td>
+        <td>
+            <button
+                class="btn btn-success"
+                v-on:click="this.redirectToAppDetail(record.id,record.title)"
+            >
+                Manage</button
+            ><button
+                class="btn btn-success mx-1"
+                v-on:click="
+                    this.$router.push({
+                        name: 'app-manage',
+                        params: { id: record.id },
+                    })
+                "
+            >
+                <i class="fa fa-edit"></i></button
+            ><button
+                class="btn btn-danger"
+                v-on:click="handle_delete(record.id)"
+            >
+                <i class="fa fa-trash"></i>
+            </button>
+        </td>
+    </tr>
+</template>
+<script>
+import axios from "axios";
+import { useAuthStore } from "@/stores/auth";
+export default {
+    name: "AppRecords",
+    props: {
+        records: {
+            type: Array,
+        },
+        delete: {
+            type: Function,
+        },
+    },
+    methods: {
+        redirectToAppDetail(id, title) {
+            const auth = useAuthStore();
+            auth.whmcs_service_id = id;
+            auth.appName = title;
+            this.$router.push({ name: "app-detail"});
+        },
+        handle_delete(id) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it!",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.delete(id);
+                }
+            });
+        },
+    },
+};
+</script>
+<style scoped>
+.cursor-pointer {
+    cursor: pointer;
+}
+</style>
