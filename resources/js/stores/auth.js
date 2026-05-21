@@ -4,10 +4,8 @@ import router from '@/routes/index.js'
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
-        user: null,
-        isAuthenticated: false,
-        appName: null,
-        whmcs_service_id: null,
+        userDetail: null,
+        appDetail: null,
     }),
 
     actions: {
@@ -16,60 +14,42 @@ export const useAuthStore = defineStore('auth', {
             await axios.get('/sanctum/csrf-cookie');
             const response = await axios.post('/admin/', form)
             if (!response.data.errors) {
-                this.user = response.data.user;
-                this.isAuthenticated = true;
+                this.userDetail = response.data.user;
             }
             return response;
         },
 
-        async getUser() {
+        async getUserDetail() {
             try {
                 const response = await axios.post('/admin/auth-check')
                 if (!response.data.errors) {
-                    this.user = response.data.user
-                    this.isAuthenticated = true;
+                    this.userDetail = response.data.user
                 } else {
-                    this.user = null;
-                    this.isAuthenticated = false;
+                    this.userDetail = null;
                 }
             } catch {
-                this.user = null
-                this.isAuthenticated = false
+                this.userDetail = null
             }
         },
 
-        async getServiceId() {
+        async getAppDetail(id = null) {
             try {
-                const response = await axios.post('/admin/get-service-id')
+                const response = await axios.post('/admin/get-app-detail', { id })
                 if(!response.data.errors) {
-                    this.whmcs_service_id = response.data.whmcs_service_id
+                    this.appDetail = response.data.app_detail
                 }else{
-                    this.whmcs_service_id = null
+                    this.appDetail = null
                 }
             } catch {
-                this.whmcs_service_id = null
+                this.appDetail = null
             }
         },
 
-        async getAppName() {
-            try {
-                const response = await axios.post('/admin/get-app-name')
-                if(!response.data.errors) {
-                    this.appName = response.data.app_name
-                }else{
-                    this.appName = null
-                }
-            } catch {
-                this.appName = null
-            }
-        },
-
+    
         async logout() {
             await axios.post('/admin/logout')
-            this.user = null
-            this.isAuthenticated = false
-            this.whmcs_service_id = null
-            this.appName = null
+            this.userDetail = null
+            this.appDetail = null
             router.push('/')
         },
     },

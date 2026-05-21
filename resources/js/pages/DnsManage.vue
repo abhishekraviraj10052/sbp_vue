@@ -152,8 +152,8 @@ export default {
     },
     mounted() {
         const auth = useAuthStore();
-        this.whmcs_service_id = auth.whmcs_service_id;
-        this.app_name = auth.appName;
+        this.whmcs_service_id = auth.appDetail ? auth.appDetail.id : null;
+        this.app_name = auth.appDetail ? auth.appDetail.title : null;
 
         this.form_data.id = this.$route.params?.id;
         if (this.form_data.id) {

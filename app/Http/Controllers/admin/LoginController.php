@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AppModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -52,39 +53,25 @@ class LoginController extends Controller
         }
     }
 
-    public function getServiceId(Request $request)
+    public function getAppDetail(Request $request)
     {
+        if($request['id']){
+           $request->session()->put('whmcs_service_id', $request['id']); 
+        }
         if ($request->session()->has('whmcs_service_id')) {
             return response()->json([
                 "errors" => false,
-                "whmcs_service_id" => $request->session()->get('whmcs_service_id')
+                "app_detail" => AppModel::where('id',$request->session()->get('whmcs_service_id'))->first()
             ]);
         } else {
             return response()->json([
                 "errors" => true,
-                "whmcs_service_id" => null
+                "app_detail" => null
             ]);
         }
     }
 
-    public function getAppName(Request $request)
-    {
-        if ($request->session()->has('app_name')) {
-            return response()->json([
-                "errors" => false,
-                "app_name" => $request->session()->get('app_name')
-            ]);
-        } else {
-            return response()->json([
-                "errors" => true,
-                "app_name" => null
-            ]);
-        }
-    }
-
-
-
-
+    
     public function logout(Request $request)
     {
         Auth::logout();

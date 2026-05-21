@@ -3,13 +3,13 @@
         <th
             scope="row"
             class="cursor-pointer"
-            v-on:click="this.redirectToAppDetail(record.id,record.title)"
+            v-on:click="this.redirectToAppDetail(record.id)"
         >
             #{{ record.id }}
         </th>
         <td
             class="cursor-pointer"
-            v-on:click="this.redirectToAppDetail(record.id,record.title)"
+            v-on:click="this.redirectToAppDetail(record.id)"
         >
             {{ record.title }}
         </td>
@@ -18,7 +18,7 @@
         <td>
             <button
                 class="btn btn-success"
-                v-on:click="this.redirectToAppDetail(record.id,record.title)"
+                v-on:click="this.redirectToAppDetail(record.id)"
             >
                 Manage</button
             ><button
@@ -41,6 +41,7 @@
     </tr>
 </template>
 <script>
+
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
 export default {
@@ -54,10 +55,9 @@ export default {
         },
     },
     methods: {
-        redirectToAppDetail(id, title) {
+        async redirectToAppDetail(id) {
             const auth = useAuthStore();
-            auth.whmcs_service_id = id;
-            auth.appName = title;
+            await auth.getAppDetail(id);
             this.$router.push({ name: "app-detail"});
         },
         handle_delete(id) {

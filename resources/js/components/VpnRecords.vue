@@ -2,8 +2,8 @@
     <tr v-for="(record, index) in records" :key="index">
         <th scope="row" class="text-center">{{ record.id }}</th>
         <td class="text-center">{{ record.title }}</td>
-        <td class="text-center">{{ record.username ?? 'n/A' }}</td>
-        <td class="text-center">{{ record.password ?? 'n/A' }}</td>
+        <td class="text-center">{{ record.username ?? "n/A" }}</td>
+        <td class="text-center">{{ record.password ?? "n/A" }}</td>
         <td class="text-center">{{ record.created_at }}</td>
         <td class="text-center">
             <button
@@ -17,6 +17,12 @@
             >
                 <i class="fa fa-edit"></i></button
             ><button
+                class="btn btn-info"
+                v-on:click="handle_delete(record.id)"
+            >
+                <i class="fa fa-download"></i>
+            </button>
+            <button
                 class="btn btn-danger"
                 v-on:click="handle_delete(record.id)"
             >

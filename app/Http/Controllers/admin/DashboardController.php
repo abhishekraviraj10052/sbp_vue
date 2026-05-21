@@ -35,7 +35,6 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $request->session()->put('whmcs_service_id', $request['whmcs_service_id']);
-        $request->session()->put('app_name', $request['app_name']);
         return response()->json([
             'announcement_count' => $this->announcement_model->where('whmcs_user_id', $request['whmcs_user_id'])->where('whmcs_service_id', $request['whmcs_service_id'])->count(),
             'dashboard_ads_count' => $this->dashboard_ads_model->where('whmcs_user_id', $request['whmcs_user_id'])->where('whmcs_service_id', $request['whmcs_service_id'])->count(),

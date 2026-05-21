@@ -19,8 +19,7 @@ Route::group(['prefix' => 'admin'],function(){
     Route::post('logout',[LoginController::class,'logout']);
 
     Route::post('auth-check',[LoginController::class,'authCheck']);
-    Route::post('get-service-id',[LoginController::class,'getServiceId']);
-    Route::post('get-app-name',[LoginController::class,'getAppName']);
+    Route::post('get-app-detail',[LoginController::class,'getAppDetail']);
 
 
     //Dashboard routes

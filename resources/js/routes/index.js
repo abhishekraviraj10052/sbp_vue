@@ -132,51 +132,29 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
     const auth = useAuthStore();
 
-    // if (!to.meta.requiresAuth && !to.meta.requiresGuest) {
-    //     return next();
-    // }
-
-    if (!auth.isAuthenticated) {
+    if (auth.userDetail === null) {
         try {
-            await auth.getUser();
+            await auth.getUserDetail();
         } catch (error) {
-            auth.user = null;
-            auth.isAuthenticated = false;
+            auth.userDetail = null;
         }
     }
 
-    if (!auth.whmcs_service_id) {
+    if (auth.appDetail === null) {
         try {
-            await auth.getServiceId();
+            await auth.getAppDetail();
         } catch (error) {
-            auth.whmcs_service_id = null;
+            auth.appDetail = null;
         }
     }
 
-    if (!auth.appName) {
-        try {
-            await auth.getAppName();
-        } catch (error) {
-            auth.appName = null;
-        }
-    }
-
-    if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    if (to.meta.requiresAuth && auth.userDetail === null) {
         return next("/");
     }
 
-    if (to.meta.requiresGuest && auth.whmcs_service_id) {
-        return next("/app-list");
-    }
-
-    // Prevent access if no service selected
-    if (
-        to.path !== "/app-list" &&
-        to.path !== "/app-manage" &&
-        !auth.whmcs_service_id
-    ) {
-        return next("/app-list");
-    } 
+    // if (to.meta.requiresGuest && auth.userDetail !== null) {
+    //     return next("/app-list");
+    // }
 
     next();
 });

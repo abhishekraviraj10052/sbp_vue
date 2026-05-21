@@ -412,8 +412,8 @@ export default {
     },
     mounted() {
         const auth = useAuthStore();
-        let whmcs_service_id = auth.whmcs_service_id;
-        this.app_name = auth.appName;
+        let whmcs_service_id = auth.appDetail ? auth.appDetail.id : null;
+        this.app_name = auth.appDetail ? auth.appDetail.name : null;
         this.whmcs_service_id = whmcs_service_id;
         if (!whmcs_service_id) {
             this.$router.push({ name: "app-list" });
@@ -424,8 +424,6 @@ export default {
             this.isLoading = true;
             axios.post("/admin/app-detail", {
                     whmcs_service_id: whmcs_service_id,
-                    whmcs_user_id: auth.user.id,
-                    app_name: auth.appName,
                 })
                 .then((res) => {
                     res.data.dns_count
