@@ -2,7 +2,13 @@
     <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <BreadCrumb
-            :crumb_data="['my apps', '#' + whmcs_service_id + ' ' + app_name, 'main dashboard', 'dashboard ads', 'list']"
+            :crumb_data="[
+                'my apps',
+                '#' + whmcs_service_id + ' ' + app_name,
+                'main dashboard',
+                'dashboard ads',
+                'list',
+            ]"
             url="dashboard-ads-manage"
             :add_btn="true"
         ></BreadCrumb>
@@ -172,11 +178,10 @@ export default {
         },
     },
     mounted() {
-
         const auth = useAuthStore();
-        this.whmcs_service_id = auth.whmcs_service_id;
-        this.app_name = auth.appName;
-       
+        this.whmcs_service_id = auth.appDetail ? auth.appDetail.id : null;
+        this.app_name = auth.appDetail ? auth.appDetail.title : null;
+
         this.isLoading = true;
         const success = useMessageStore();
         if (success.message) {

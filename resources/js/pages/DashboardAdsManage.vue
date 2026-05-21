@@ -3,8 +3,20 @@
     <BreadCrumb
         :crumb_data="
             form_data.id
-                ? ['my apps', '#' + whmcs_service_id + ' ' + app_name, 'main dashboard', 'dashboard ads', 'edit']
-                : ['my apps', '#' + whmcs_service_id + ' ' + app_name, 'main dashboard', 'dashboard ads', 'add new']
+                ? [
+                      'my apps',
+                      '#' + whmcs_service_id + ' ' + app_name,
+                      'main dashboard',
+                      'dashboard ads',
+                      'edit',
+                  ]
+                : [
+                      'my apps',
+                      '#' + whmcs_service_id + ' ' + app_name,
+                      'main dashboard',
+                      'dashboard ads',
+                      'add new',
+                  ]
         "
         whose="app"
     ></BreadCrumb>
@@ -53,7 +65,8 @@
                                     'form-control',
                                     { 'border-danger': file_error },
                                 ]"
-                                multiple accept="image/*"
+                                multiple
+                                accept="image/*"
                                 v-on:change="handleFileChange"
                             />
                             <span class="text-danger" v-show="file_error">{{
@@ -146,7 +159,6 @@ export default {
     },
     data() {
         return {
-
             whmcs_service_id: "",
             app_name: "",
             form_data: {
@@ -259,22 +271,23 @@ export default {
         },
     },
     mounted() {
-
         const auth = useAuthStore();
-        this.whmcs_service_id = auth.whmcs_service_id;
-        this.app_name = auth.appName;
+        this.whmcs_service_id = auth.appDetail ? auth.appDetail.id : null;
+        this.app_name = auth.appDetail ? auth.appDetail.title : null;
 
         this.form_data.id = this.$route.params?.id;
         if (this.form_data.id) {
-            axios.post("/admin/dashboard-ads-edit", {
+            axios
+                .post("/admin/dashboard-ads-edit", {
                     id: this.form_data.id,
-            }).then((res) => {
+                })
+                .then((res) => {
                     this.form_data.id = res.data.record.id;
                     this.form_data.title = res.data.record.title;
                     this.form_data.message = res.data.record.text;
                     this.form_data.files = res.data.record.filepath ?? [];
                     this.form_data.status = res.data.record.status;
-            });
+                });
         }
     },
 };

@@ -25,6 +25,8 @@ import DashboardAdsConfig from "../pages/DashboardAdsConfig.vue";
 import VpnList from "../pages/VpnList.vue";
 import VpnManage from "../pages/VpnManage.vue";
 
+import MaintainenceMode from "../pages/MaintainenceMode.vue";
+
 const routes = [
     {
         path: "/",
@@ -120,6 +122,12 @@ const routes = [
         path: "/vpn-manage/:id?",
         name: "vpn-manage",
         component: VpnManage,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: "/maintainence-mode",
+        name: "maintainence-mode",
+        component: MaintainenceMode,
         meta: { requiresAuth: true },
     },
 ];

@@ -2,7 +2,13 @@
     <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <BreadCrumb
-            :crumb_data="['my apps', 'maindashboard', 'vpn', 'list']"
+            :crumb_data="[
+                'my apps',
+                '#' + whmcs_service_id + ' ' + app_name,
+                'maindashboard',
+                'vpn',
+                'list',
+            ]"
             url="vpn-manage"
             :add_btn="true"
         ></BreadCrumb>
@@ -105,6 +111,7 @@
 <script>
 import axios from "axios";
 import { useMessageStore } from "../stores/messageStore";
+import { useAuthStore } from "@/stores/auth";
 
 import BreadCrumb from "../components/bread_crumb/BreadCrumb.vue";
 import SuccessMessage from "../components/success_alert/SuccessMessage.vue";
@@ -119,6 +126,8 @@ export default {
     },
     data() {
         return {
+            whmcs_service_id: "",
+            app_name: "",
             isLoading: false,
             success_msg: "",
             records: [],
@@ -143,6 +152,10 @@ export default {
         },
     },
     mounted() {
+        const auth = useAuthStore();
+        this.whmcs_service_id = auth.appDetail ? auth.appDetail.id : null;
+        this.app_name = auth.appDetail ? auth.appDetail.title : null;
+
         this.isLoading = true;
         const success = useMessageStore();
         if (success.message) {

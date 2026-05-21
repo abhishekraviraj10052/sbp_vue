@@ -1,7 +1,13 @@
 <template>
     <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
-        <BreadCrumb :crumb_data="['my apps', '#' + whmcs_service_id + ' ' + app_name, 'main dashbaord']"></BreadCrumb>
+        <BreadCrumb
+            :crumb_data="[
+                'my apps',
+                '#' + whmcs_service_id + ' ' + app_name,
+                'main dashbaord',
+            ]"
+        ></BreadCrumb>
     </div>
     <!-- /breadcrumb -->
     <div
@@ -412,18 +418,16 @@ export default {
     },
     mounted() {
         const auth = useAuthStore();
-        let whmcs_service_id = auth.appDetail ? auth.appDetail.id : null;
-        this.app_name = auth.appDetail ? auth.appDetail.name : null;
-        this.whmcs_service_id = whmcs_service_id;
-        if (!whmcs_service_id) {
+        this.whmcs_service_id = auth.appDetail ? auth.appDetail.id : null;
+        this.app_name = auth.appDetail ? auth.appDetail.title : null;
+        if (!this.whmcs_service_id) {
             this.$router.push({ name: "app-list" });
-        } 
-        else 
-        {
+        } else {
             let auth = useAuthStore();
             this.isLoading = true;
-            axios.post("/admin/app-detail", {
-                    whmcs_service_id: whmcs_service_id,
+            axios
+                .post("/admin/app-detail", {
+                    whmcs_service_id: this.whmcs_service_id,
                 })
                 .then((res) => {
                     res.data.dns_count

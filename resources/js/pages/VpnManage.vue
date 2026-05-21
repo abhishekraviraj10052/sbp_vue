@@ -3,8 +3,20 @@
     <BreadCrumb
         :crumb_data="
             form_data.id
-                ? ['my apps', 'main dashboard', 'dashboard ads', 'edit']
-                : ['my apps', 'main dashboard', 'dashboard ads', 'add new']
+                ? [
+                      'my apps',
+                      '#' + whmcs_service_id + ' ' + app_name,
+                      'main dashboard',
+                      'dashboard ads',
+                      'edit',
+                  ]
+                : [
+                      'my apps',
+                      '#' + whmcs_service_id + ' ' + app_name,
+                      'main dashboard',
+                      'dashboard ads',
+                      'add new',
+                  ]
         "
         whose="app"
     ></BreadCrumb>
@@ -45,7 +57,6 @@
                                 type="password"
                                 class="form-control"
                                 v-model="form_data.password"
-                               
                             />
                             <i
                                 class="far fa-eye"
@@ -63,7 +74,7 @@
                             />
                             <span class="text-danger">{{ file_error }}</span>
                         </div>
-             
+
                         <div class="form-group">
                             <button
                                 type="submit"
@@ -100,6 +111,8 @@
 <script>
 import axios from "axios";
 import { useMessageStore } from "../stores/messageStore";
+import { useAuthStore } from "@/stores/auth";
+
 import BreadCrumb from "../components/bread_crumb/BreadCrumb.vue";
 
 export default {
@@ -109,6 +122,8 @@ export default {
     },
     data() {
         return {
+            whmcs_service_id: "",
+            app_name: "",
             form_data: {
                 id: "",
                 title: "",
@@ -136,11 +151,11 @@ export default {
             fd.append("title", this.form_data.title);
             fd.append("username", this.form_data.username);
             fd.append("password", this.form_data.password);
-           
+
             if (this.form_data.file) {
                 fd.append("file", this.form_data.file);
             }
-        
+
             axios
                 .post("/admin/vpn-manage", fd, {
                     headers: {
@@ -162,6 +177,10 @@ export default {
         },
     },
     mounted() {
+        const auth = useAuthStore();
+        this.whmcs_service_id = auth.appDetail ? auth.appDetail.id : null;
+        this.app_name = auth.appDetail ? auth.appDetail.title : null;
+
         this.form_data.id = this.$route.params?.id;
         if (this.form_data.id) {
             axios

@@ -3,8 +3,20 @@
     <BreadCrumb
         :crumb_data="
             form_data.id
-                ? ['my apps',  '#' + whmcs_service_id + ' ' + app_name, 'main dashboard', 'rewarded ads', 'edit']
-                : ['my apps',  '#' + whmcs_service_id + ' ' + app_name, 'main dashboard', 'rewarded ads', 'add new']
+                ? [
+                      'my apps',
+                      '#' + whmcs_service_id + ' ' + app_name,
+                      'main dashboard',
+                      'rewarded ads',
+                      'edit',
+                  ]
+                : [
+                      'my apps',
+                      '#' + whmcs_service_id + ' ' + app_name,
+                      'main dashboard',
+                      'rewarded ads',
+                      'add new',
+                  ]
         "
         whose="app"
     ></BreadCrumb>
@@ -336,8 +348,9 @@ export default {
     },
     mounted() {
         const auth = useAuthStore();
-        this.whmcs_service_id = auth.whmcs_service_id;
-        this.app_name = auth.appName;
+        this.whmcs_service_id = auth.appDetail ? auth.appDetail.id : null;
+        this.app_name = auth.appDetail ? auth.appDetail.title : null;
+
         this.form_data.id = this.$route.params?.id;
         if (this.form_data.id) {
             axios

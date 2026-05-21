@@ -306,14 +306,14 @@
                     class="side-menu__item"
                     data-bs-toggle="slide"
                     href="javascript:;"
-                
-                   v-on:click="
+                    v-on:click="
                         () => {
                             this.$router.push({
                                 name: 'vpn-list',
                             });
                         }
-                    "           >
+                    "
+                >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         class="side-menu__icon"
@@ -376,6 +376,13 @@
                     class="side-menu__item"
                     data-bs-toggle="slide"
                     href="javascript:;"
+                    v-on:click="
+                        () => {
+                            this.$router.push({
+                                name: 'maintainence-mode',
+                            });
+                        }
+                    "
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
