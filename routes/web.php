@@ -6,6 +6,7 @@ use App\Http\Controllers\admin\AnnouncementController;
 use App\Http\Controllers\admin\DashboardAdsController;
 use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\LoginController;
+use App\Http\Controllers\admin\MaintainenceModeController;
 use App\Http\Controllers\admin\RewardedAdsController;
 use App\Http\Controllers\admin\VpnController;
 use Illuminate\Http\Request;
@@ -71,6 +72,10 @@ Route::group(['prefix' => 'admin'],function(){
     Route::post('vpn-manage',[VpnController::class,'manage_vpn']);
     Route::post('vpn-edit',[VpnController::class,'edit_vpn']);
     Route::post('vpn-delete',[VpnController::class,'delete_vpn']);
+
+    //Maintainence Mode
+    Route::post('maintainence-mode-manage',[MaintainenceModeController::class,'manage_maintainence_mode']);
+    Route::post('maintainence-mode-status',[MaintainenceModeController::class,'manage_maintainence_status']);
 });
 
 

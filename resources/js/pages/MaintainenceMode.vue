@@ -1,23 +1,12 @@
 <template>
 	<!-- breadcrumb -->
 	<BreadCrumb
-		:crumb_data="
-			form_data.id
-				? [
-						'my apps',
-						'#' + whmcs_service_id + ' ' + app_name,
-						'maindashboard',
-						'dns',
-						'edit',
-					]
-				: [
-						'my apps',
-						'#' + whmcs_service_id + ' ' + app_name,
-						'maindashboard',
-						'dns',
-						'add new',
-					]
-		"
+		:crumb_data="[
+			'my apps',
+			'#' + whmcs_service_id + ' ' + app_name,
+			'maindashboard',
+			'maintainencemode',
+		]"
 		whose="app"
 	></BreadCrumb>
 	<!-- /breadcrumb -->
@@ -28,24 +17,18 @@
 				v-if="success_msg"
 				:success_msg="success_msg"
 			></SuccessMessage>
-			<div class="card box-shadow-0">
+			<div class="card box-shadow-0 mt-5">
 				<div class="card-body pt-0">
 					<form>
 						<div class="form-group">
 							<label>
 								<input
 									type="checkbox"
-									:class="[
-										'',
-										{ 'border-danger': dns_name_error },
-									]"
-									v-model="form_data.dns_name"
+									v-model="form_data.status"
+									:checked="form_data.status"
 								/>
 								Tick to put an app on maintainence mode
 							</label>
-							<span class="text-danger" v-show="dns_name_error">{{
-								dns_name_error
-							}}</span>
 						</div>
 						<div class="form-group">
 							<label>Maintainence mode message</label>
@@ -53,16 +36,14 @@
 								type="text"
 								:class="[
 									'form-control',
-									{ 'border-danger': dns_value_error },
+									{ 'border-danger': message_error },
 								]"
-								v-model="form_data.dns_value"
+								v-model="form_data.message"
 							>
 							</textarea>
-							<span
-								class="text-danger"
-								v-show="dns_value_error"
-								>{{ dns_value_error }}</span
-							>
+							<span class="text-danger" v-show="message_error">{{
+								message_error
+							}}</span>
 						</div>
 						<div class="form-group">
 							<button
@@ -74,18 +55,6 @@
 								v-on:click="submit($event)"
 							>
 								{{ !disabled ? "Save" : "Please wait..." }}
-							</button>
-							<button
-								:class="[
-									'btn btn-light mt-3 mb-0 mx-3',
-									{ disabled: disabled },
-								]"
-								href="javascript:void(0);"
-								v-on:click="
-									this.$router.push({ name: 'dns-list' })
-								"
-							>
-								Cancel
 							</button>
 						</div>
 					</form>
@@ -115,11 +84,10 @@ export default {
 			app_name: "",
 			form_data: {
 				id: "",
-				on_maintainence: false,
+				status: false,
 				maintainence_mode_message: "",
 			},
-			dns_name_error: "",
-			dns_value_error: "",
+			message_error: "",
 			disabled: false,
 			success_msg: "",
 		};
@@ -128,27 +96,19 @@ export default {
 		submit(e) {
 			e.preventDefault();
 			this.disabled = true;
-			this.dns_name_error = "";
-			this.dns_value_error = "";
-			axios.post("/admin/dns-manage", this.form_data).then((res) => {
-				this.disabled = false;
-				if (res.data.errors) {
-					if (res.data.msg.dns_name) {
-						this.dns_name_error = res.data.msg.dns_name[0];
-					}
-					if (res.data.msg.dns_value) {
-						this.dns_value_error = res.data.msg.dns_value[0];
-					}
-				} else {
-					if (!this.form_data.id) {
-						const success = useMessageStore();
-						success.setMessage(res.data.msg);
-						this.$router.push({ name: "dns-list" });
+			this.message_error = "";
+			axios
+				.post("/admin/maintainence-mode-manage", this.form_data)
+				.then((res) => {
+					this.disabled = false;
+					if (res.data.errors) {
+						if (res.data.msg.message) {
+							this.message_error = res.data.msg.message[0];
+						}
 					} else {
 						this.success_msg = res.data.msg;
 					}
-				}
-			});
+				});
 		},
 	},
 	mounted() {
@@ -156,18 +116,11 @@ export default {
 		this.whmcs_service_id = auth.appDetail ? auth.appDetail.id : null;
 		this.app_name = auth.appDetail ? auth.appDetail.title : null;
 
-		this.form_data.id = this.$route.params?.id;
-		if (this.form_data.id) {
-			axios
-				.post("/admin/dns-edit", {
-					id: this.form_data.id,
-				})
-				.then((res) => {
-					this.form_data.id = res.data.record.id;
-					this.form_data.dns_name = res.data.record.name;
-					this.form_data.dns_value = res.data.record.dns;
-				});
-		}
+		axios.post("/admin/maintainence-mode-status").then((res) => {
+			this.form_data.id = res.data.id;
+			this.form_data.status = res.data.status == "on" ? true : false;
+			this.form_data.message = res.data.msg;
+		});
 	},
 };
 </script>
