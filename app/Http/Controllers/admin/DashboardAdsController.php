@@ -20,15 +20,27 @@ class DashboardAdsController extends Controller
         $this->dashboard_ads_model = new DashboardAdsModel();
     }
 
-    public function list_dashboard_ads()
+    public function list_dashboard_ads(Request $request)
     {
-        $records = $this->dashboard_ads_model->orderBy('id', 'desc')->paginate(10);
-        foreach ($records as $index =>  $record) {
-            $record->filepath = explode(',', $record->filepath);
-        };
-        return response()->json([
-            'records' => $records
-        ]);
+            $query = DashboardAdsModel::query();
+            if ($request->search) {
+                
+                $query->where(function ($q) use ($request) {
+                    $q->where('title', 'like', '%' . $request->search . '%')
+                      ->orWhere('text', 'like', '%' . $request->search . '%');
+                });
+
+            }
+
+            $sortField = $request->sort_field ?? 'id';
+            $sortDirection = $request->sort_direction ?? 'desc';
+            $query->orderBy($sortField, $sortDirection);
+
+            $records = $query->paginate(10);
+            return response()->json([
+                'errors' => false,
+                'records' => $records
+            ]);
     }
 
     public function manage_dashboard_ads(Request $request, Response $response)
