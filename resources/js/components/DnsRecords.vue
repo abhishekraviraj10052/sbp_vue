@@ -1,9 +1,9 @@
 <template>
     <tr v-for="(record, index) in records" :key="index">
-        <th scope="row" class="text-center">{{ record.id }}</th>
-        <td class="text-center">{{ record.name }}</td>
-        <td class="text-center">{{ record.dns }}</td>
-        <td class="text-center">
+        <th scope="row">{{ record.id }}</th>
+        <td>{{ record.name }}</td>
+        <td>{{ record.dns }}</td>
+        <td>
             <button
                 class="btn btn-success mx-1"
                 v-on:click="

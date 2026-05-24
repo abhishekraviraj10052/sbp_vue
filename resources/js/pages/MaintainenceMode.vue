@@ -12,12 +12,12 @@
 	<!-- /breadcrumb -->
 	<!-- row -->
 	<div class="row">
-		<div class="col-lg-6 col-xl-6 col-md-12 col-sm-12">
+		<div class="col-md-8">
 			<SuccessMessage
 				v-if="success_msg"
 				:success_msg="success_msg"
 			></SuccessMessage>
-			<div class="card box-shadow-0 mt-5">
+			<div class="card box-shadow-0 mt-5 pt-20">
 				<div class="card-body pt-0">
 					<form>
 						<div class="form-group">
@@ -117,10 +117,15 @@ export default {
 		this.app_name = auth.appDetail ? auth.appDetail.title : null;
 
 		axios.post("/admin/maintainence-mode-status").then((res) => {
-			this.form_data.id = res.data.id;
-			this.form_data.status = res.data.status == "on" ? true : false;
-			this.form_data.message = res.data.msg;
+			this.form_data.id = res.data?.id;
+			this.form_data.status = res.data?.status == "on" ? true : false;
+			this.form_data.message = res.data?.msg;
 		});
 	},
 };
 </script>
+<style scoped>
+.pt-20 {
+	padding-top: 20px;
+}
+</style>

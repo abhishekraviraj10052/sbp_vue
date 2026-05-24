@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use App\Models\AnnouncementModel;
+use Illuminate\Support\Facades\Auth;
+
 
 class AnnouncementController extends Controller
 {
@@ -17,10 +19,25 @@ class AnnouncementController extends Controller
         $this->announcement_model = new AnnouncementModel();
     }
 
-    public function list_announcements()
+    public function list_announcements(Request $request)
     {
-        $records = $this->announcement_model->orderBy('id', 'desc')->paginate(10);
+        $query = AnnouncementModel::query();
+        if ($request->search) {
+            
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('message', 'like', '%' . $request->search . '%');
+            });
+
+        }
+
+        $sortField = $request->sort_field ?? 'id';
+        $sortDirection = $request->sort_direction ?? 'desc';
+        $query->orderBy($sortField, $sortDirection);
+
+        $records = $query->paginate(10);
         return response()->json([
+            'errors' => false,
             'records' => $records
         ]);
     }
@@ -44,8 +61,8 @@ class AnnouncementController extends Controller
             if ($this->announcement_model->create([
                 'title' => $request['title'],
                 'message' => $request['message'],
-                'whmcs_user_id' => 1,
-                'whmcs_service_id' => 1,
+                'whmcs_user_id' => Auth::user()->id,
+                'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
             ])) {
                 return response()->json([
                     'errors' => false,
@@ -61,8 +78,8 @@ class AnnouncementController extends Controller
             if ($this->announcement_model->where('id', $request['id'])->update([
                 'title' => $request['title'],
                 'message' => $request['message'],
-                'whmcs_user_id' => 1,
-                'whmcs_service_id' => 1,
+                'whmcs_user_id' => Auth::user()->id,
+                'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
             ])) {
                 return response()->json([
                     'errors' => false,

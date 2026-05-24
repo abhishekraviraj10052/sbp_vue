@@ -73,11 +73,16 @@ class MaintainenceModeController extends Controller
     public function manage_maintainence_status(Request $request){
         $record = $this->MaintainenceModeModel->where('whmcs_user_id',Auth::user()->id)->where('whmcs_service_id',$request->session()->get('whmcs_service_id'))->first();
 
-         return response()->json([
+         if($record){
+            return response()->json([
                     'errors' => false,
                     'id' => $record->id,
                     'status' => $record->status,
                     'msg' => $record->message
                 ]);
+        }else{
+
+          return response()->json([]);
     }
+        }
 }

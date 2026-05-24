@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use App\Models\DashboardAdsModel;
+use Illuminate\Support\Facades\Auth;
+
 
 class DashboardAdsController extends Controller
 {
@@ -91,8 +93,8 @@ class DashboardAdsController extends Controller
                 'text' => $request['message'] ?? '',
                 'status' => $request['status'] ?? 'active',
                 'redirect_link' => $request['redirect_link'] ?? '',
-                'whmcs_user_id' => 1,
-                'whmcs_service_id' => 1,
+                'whmcs_user_id' => Auth::user()->id,
+                'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ])) {
@@ -115,8 +117,8 @@ class DashboardAdsController extends Controller
                 'text' => $request['message'],
                 'status' => $request['status'],
                 'redirect_link' => $request['redirect_link'] ?? '',
-                'whmcs_user_id' => 1,
-                'whmcs_service_id' => 1,
+                'whmcs_user_id' => Auth::user()->id,
+                'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ])) {
@@ -218,8 +220,8 @@ class DashboardAdsController extends Controller
             DashboardAdsConfigurationModel::insert([
                 'setting' => 'add_status',
                 'value' => $request['add_status'],
-                'whmcs_user_id' => 1,
-                'whmcs_service_id' => 1,
+                'whmcs_user_id' => Auth::user()->id,
+                'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use App\Models\{
     AppModel,
     AnnouncementModel,
@@ -36,10 +37,10 @@ class DashboardController extends Controller
     {
         $request->session()->put('whmcs_service_id', $request['whmcs_service_id']);
         return response()->json([
-            'announcement_count' => $this->announcement_model->where('whmcs_user_id', $request['whmcs_user_id'])->where('whmcs_service_id', $request['whmcs_service_id'])->count(),
-            'dashboard_ads_count' => $this->dashboard_ads_model->where('whmcs_user_id', $request['whmcs_user_id'])->where('whmcs_service_id', $request['whmcs_service_id'])->count(),
-            'dns_count' => $this->dns_model->where('whmcs_user_id', $request['whmcs_user_id'])->where('whmcs_service_id', $request['whmcs_service_id'])->count(),
-            'rewarded_ads_count' => $this->rewarded_ads_model->where('whmcs_user_id', $request['whmcs_user_id'])->where('whmcs_service_id', $request['whmcs_service_id'])->count(),
+            'announcement_count' => $this->announcement_model->where('whmcs_user_id', Auth::user()->id)->where('whmcs_service_id', $request->session()->get('whmcs_service_id'))->count(),
+            'dashboard_ads_count' => $this->dashboard_ads_model->where('whmcs_user_id', Auth::user()->id)->where('whmcs_service_id', $request->session()->get('whmcs_service_id'))->count(),
+            'dns_count' => $this->dns_model->where('whmcs_user_id', Auth::user()->id)->where('whmcs_service_id', $request->session()->get('whmcs_service_id'))->count(),
+            'rewarded_ads_count' => $this->rewarded_ads_model->where('whmcs_user_id', Auth::user()->id)->where('whmcs_service_id', $request->session()->get('whmcs_service_id'))->count(),
         ]);
     }
 }

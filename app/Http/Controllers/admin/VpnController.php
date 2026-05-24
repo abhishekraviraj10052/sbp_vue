@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Models\VpnModel;
 use ZipArchive;
+use Illuminate\Support\Facades\Auth;
+
 
 class VpnController extends Controller
 {
@@ -20,12 +22,32 @@ class VpnController extends Controller
         $this->vpn_model = new VpnModel();
     }
 
-    public function list_vpn()
+    public function list_vpn(Request $request)
     {
-        $records = $this->vpn_model->orderBy('id', 'desc')->paginate(10);
-        return response()->json([
-            'records' => $records
-        ]);
+            $query = VpnModel::query();
+            if ($request->search) {
+                
+                $query->where(function ($q) use ($request) {
+                    $q->where('title', 'like', '%' . $request->search . '%')
+                      ->orWhere('type', 'like', '%' . $request->search . '%');
+                });
+
+            }
+
+            $sortField = $request->sort_field ?? 'id';
+            $sortDirection = $request->sort_direction ?? 'desc';
+            $query->orderBy($sortField, $sortDirection);
+
+            $records = $query->paginate(10);
+            foreach ($records as $index =>  $record) {
+                if ($record->type == 'image') {
+                    $record->filepath = explode(',', $record->filepath);
+                }
+            };
+            return response()->json([
+                'errors' => false,
+                'records' => $records
+            ]);
     }
 
     public function manage_vpn(Request $request, Response $response)
@@ -85,10 +107,10 @@ class VpnController extends Controller
                         'password' => $password,
                         'shareable_password' => $shareable_password,
                         'file_content' => aes_encrypt($zip_content['file_content']),
-                        'whmcs_user_id' => 1,
-                        'whmcs_service_id' => 1,
+                        'whmcs_user_id' => Auth::user()->id,
+                        'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                         'created_at' => date('Y-m-d H:i:s'),
-                        'updated_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s')
                     ]);
 
                     return response()->json([
@@ -103,10 +125,10 @@ class VpnController extends Controller
                     'password' => $password,
                     'shareable_password' => $shareable_password,
                     'file_content' => aes_encrypt($fileContent),
-                    'whmcs_user_id' => 1,
-                    'whmcs_service_id' => 1,
+                    'whmcs_user_id' => Auth::user()->id,
+                    'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                     'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
                 ])) {
                     return response()->json([
                         'errors' => false,
@@ -126,9 +148,9 @@ class VpnController extends Controller
                 'username' => $request['username'],
                 'password' => $password,
                 'shareable_password' => $shareable_password,
-                'whmcs_user_id' => 1,
-                'whmcs_service_id' => 1,
-                'updated_at' => date('Y-m-d H:i:s'),
+                'whmcs_user_id' => Auth::user()->id,
+                'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
+                'updated_at' => date('Y-m-d H:i:s')
             ])) {
                 return response()->json([
                     'errors' => false,

@@ -3,7 +3,7 @@
     <div class="breadcrumb-header justify-content-between">
         <BreadCrumb
             :crumb_data="
-                form_data.id ? ['my apps', 'edit'] : ['my apps', 'add new']
+                form_data.id ? ['My apps', 'edit'] : ['My aaps', 'add new']
             "
             whose="app"
         ></BreadCrumb>
@@ -11,12 +11,12 @@
     <!-- /breadcrumb -->
     <!-- row -->
     <div class="row">
-        <div class="col-lg-6 col-xl-6 col-md-12 col-sm-12">
+        <div class="col-md-8">
             <SuccessMessage
                 v-if="success_msg"
                 :success_msg="success_msg"
             ></SuccessMessage>
-            <div class="card box-shadow-0">
+            <div class="card box-shadow-0 pt-5">
                 <div class="card-body pt-0">
                     <form>
                         <div class="form-group">

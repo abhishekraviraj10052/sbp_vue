@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use App\Models\AppModel;
+use Illuminate\Support\Facades\Auth;
+
 
 
 
@@ -19,11 +21,27 @@ class AppController extends Controller
         $this->app_model = new AppModel();
     }
 
-    public function list_app(){
-        $records = $this->app_model->orderBy('id','desc')->paginate(10);
-        return response()->json([
-            'records' => $records
-        ]);
+    public function list_app(Request $request){
+       
+            $query = AppModel::query();
+            if ($request->search) {
+                
+                $query->where(function ($q) use ($request) {
+                    $q->where('title', 'like', '%' . $request->search . '%')
+                      ->orWhere('type', 'like', '%' . $request->search . '%');
+                });
+
+            }
+
+            $sortField = $request->sort_field ?? 'id';
+            $sortDirection = $request->sort_direction ?? 'desc';
+            $query->orderBy($sortField, $sortDirection);
+
+            $records = $query->paginate(10);
+            return response()->json([
+                'errors' => false,
+                'records' => $records
+            ]);
     }
 
     public function manage_app(Request $request,Response $response){
@@ -44,7 +62,7 @@ class AppController extends Controller
                 if($this->app_model->create([
                     'title' => $request['app_name'],
                     'type' => $request['app_type'],
-                    'whmcs_user_id' => 1,
+                    'whmcs_user_id' => Auth::user()->id,
                 ])){
                     return response()->json([
                         'errors' => false,
@@ -60,7 +78,7 @@ class AppController extends Controller
                 if($this->app_model->where('id',$request['id'])->update([
                     'title' => $request['app_name'],
                     'type' => $request['app_type'],
-                    'whmcs_user_id' => 1,
+                    'whmcs_user_id' => Auth::user()->id,
                 ])){
                     return response()->json([
                         'errors' => false,

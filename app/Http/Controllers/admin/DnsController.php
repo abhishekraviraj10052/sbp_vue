@@ -18,11 +18,26 @@ class DnsController extends Controller
         $this->dns_model = new DnsModel();
     }
 
-    public function list_dns(){
-        $records = $this->dns_model->where('whmcs_user_id', Auth::user()->id)->where('whmcs_service_id', session()->get('whmcs_service_id'))->orderBy('id','desc')->paginate(10);
-        return response()->json([
-            'records' => $records
-        ]);
+    public function list_dns(Request $request){
+        $query = DnsModel::query();
+            if ($request->search) {
+                
+                $query->where(function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->search . '%')
+                      ->orWhere('dns', 'like', '%' . $request->search . '%');
+                });
+
+            }
+
+            $sortField = $request->sort_field ?? 'id';
+            $sortDirection = $request->sort_direction ?? 'desc';
+            $query->orderBy($sortField, $sortDirection);
+
+            $records = $query->paginate(10);
+            return response()->json([
+                'errors' => false,
+                'records' => $records
+            ]);
     }
 
     public function manage_dns(Request $request,Response $response){

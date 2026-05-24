@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use App\Models\RewardedAdsModel;
+use Illuminate\Support\Facades\Auth;
+
 
 class RewardedAdsController extends Controller
 {
@@ -18,17 +20,34 @@ class RewardedAdsController extends Controller
         $this->rewarded_ads_model = new RewardedAdsModel();
     }
 
-    public function list_rewarded_ads()
+    public function list_rewarded_ads(Request $request)
     {
-        $records = $this->rewarded_ads_model->orderBy('id', 'desc')->paginate(10);
-        foreach ($records as $index =>  $record) {
-            if ($record->type == 'image') {
-                $record->filepath = explode(',', $record->filepath);
+
+            $query = RewardedAdsModel::query();
+            if ($request->search) {
+                
+                $query->where(function ($q) use ($request) {
+                    $q->where('title', 'like', '%' . $request->search . '%')
+                      ->orWhere('type', 'like', '%' . $request->search . '%');
+                });
+
             }
-        };
-        return response()->json([
-            'records' => $records
-        ]);
+
+            $sortField = $request->sort_field ?? 'id';
+            $sortDirection = $request->sort_direction ?? 'desc';
+            $query->orderBy($sortField, $sortDirection);
+
+            $records = $query->paginate(10);
+            foreach ($records as $index =>  $record) {
+                if ($record->type == 'image') {
+                    $record->filepath = explode(',', $record->filepath);
+                }
+            };
+            return response()->json([
+                'errors' => false,
+                'records' => $records
+            ]);
+
     }
 
     public function manage_rewarded_ads(Request $request, Response $response)
@@ -101,8 +120,8 @@ class RewardedAdsController extends Controller
                 'text' => $request['message'] ?? '',
                 'status' => $request['status'] ?? 'active',
                 'redirect_link' => $request['redirect_link'] ?? '',
-                'whmcs_user_id' => 1,
-                'whmcs_service_id' => 1,
+                'whmcs_user_id' => Auth::user()->id,
+                'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ])) {
@@ -125,8 +144,8 @@ class RewardedAdsController extends Controller
                 'text' => $request['message'],
                 'status' => $request['status'] ?? 'active',
                 'redirect_link' => $request['redirect_link'] ?? '',
-                'whmcs_user_id' => 1,
-                'whmcs_service_id' => 1,
+                'whmcs_user_id' => Auth::user()->id,
+                'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ])) {
@@ -221,7 +240,11 @@ class RewardedAdsController extends Controller
         foreach ($configurations as $setting => $value) {
             RewardedAdsConfigurationModel::updateOrCreate(
                 ['setting' => $setting],
-                ['value' => $value, 'whmcs_user_id' => 1, 'whmcs_service_id' => 1]
+                [
+                    'value' => $value, 
+                    'whmcs_user_id' => Auth::user()->id,
+                    'whmcs_service_id' => $request->session()->get('whmcs_service_id')
+                ]
             );
         }
         return response()->json([

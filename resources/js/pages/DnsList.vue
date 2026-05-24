@@ -2,7 +2,13 @@
     <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <BreadCrumb
-            :crumb_data="['my apps', '#' + whmcs_service_id + ' ' + app_name, 'maindashboard', 'dns', 'list']"
+            :crumb_data="[
+                'my apps',
+                '#' + whmcs_service_id + ' ' + app_name,
+                'maindashboard',
+                'dns',
+                'list',
+            ]"
             url="dns-manage"
             :add_btn="true"
         ></BreadCrumb>
@@ -42,12 +48,29 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
+                        <!-- Search -->
+                        <div class="d-flex justify-content-end mb-3">
+                            <!-- <div class="w-100 w-md-auto"> -->
+                            <input
+                                v-model="search"
+                                @input="searchData"
+                                placeholder="Search..."
+                                class="form-control w-300"
+                            />
+                            <!-- </div> -->
+                        </div>
+                        <!-- Search -->
                         <table
                             class="table table-bordered table-hover mb-0 text-md-nowrap"
                         >
                             <thead>
                                 <tr>
-                                    <th class="text-center">ID</th>
+                                    <th
+                                        class="cursor-pointer"
+                                        @click="sortBy('id')"
+                                    >
+                                        ID
+                                    </th>
                                     <th class="text-center">Name</th>
                                     <th class="text-center">Dns</th>
                                     <th class="text-center">Action</th>
@@ -92,6 +115,24 @@
                                 ></DnsRecords>
                             </tbody>
                         </table>
+                        <!-- Pagination -->
+                        <div class="text-center">
+                            <button
+                                class="btn btn-primary mt-3 mb-0"
+                                :disabled="page === 1"
+                                @click="changePage(page - 1)"
+                            >
+                                Prev
+                            </button>
+                            <button
+                                class="btn btn-primary mt-3 mx-3 mb-0"
+                                :disabled="records.length == 0"
+                                @click="changePage(page + 1)"
+                            >
+                                Next
+                            </button>
+                        </div>
+                        <!-- Pagination -->
                     </div>
                 </div>
             </div>
@@ -122,9 +163,53 @@ export default {
             isLoading: false,
             success_msg: "",
             records: [],
+
+            search: "",
+            page: 1,
+            lastPage: 1,
+            sortField: "id",
+            sortDirection: "desc",
         };
     },
     methods: {
+        loadData() {
+            try {
+                this.isLoading = true;
+                axios
+                    .post("/admin/dns-list", {
+                        page: this.page,
+                        search: this.search,
+                        sort_field: this.sortField,
+                        sort_direction: this.sortDirection,
+                    })
+                    .then((res) => {
+                        this.records = res.data.records.data;
+                        this.lastPage = res.data.last_page;
+                        this.isLoading = false;
+                    });
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        changePage(page) {
+            this.page = page;
+            this.loadData();
+        },
+        sortBy(field) {
+            if (this.sortField === field) {
+                this.sortDirection =
+                    this.sortDirection === "asc" ? "desc" : "asc";
+            } else {
+                this.sortField = field;
+                this.sortDirection = "asc";
+            }
+
+            this.loadData();
+        },
+        searchData() {
+            this.page = 1;
+            this.loadData();
+        },
         delete(id) {
             axios
                 .post("/admin/dns-delete", {
@@ -143,7 +228,6 @@ export default {
         },
     },
     mounted() {
-
         const auth = useAuthStore();
         this.whmcs_service_id = auth.appDetail ? auth.appDetail.id : null;
         this.app_name = auth.appDetail ? auth.appDetail.title : null;
@@ -155,10 +239,12 @@ export default {
             this.success_msg = success.message;
             success.clearMessage();
         }
-        axios.post("/admin/dns-list").then((res) => {
-            this.records = res.data.records.data;
-            this.isLoading = false;
-        });
+        this.loadData();
     },
 };
 </script>
+<style>
+.cursor-pointer {
+    cursor: pointer;
+}
+</style>

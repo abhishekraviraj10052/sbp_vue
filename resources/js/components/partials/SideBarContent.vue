@@ -61,6 +61,7 @@
                     class="side-menu__item"
                     data-bs-toggle="slide"
                     href="javascript:;"
+                    v-on:click="logout"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -471,6 +472,7 @@
                     class="side-menu__item"
                     data-bs-toggle="slide"
                     href="javascript:;"
+                    v-on:click="logout"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -491,7 +493,26 @@
     </div>
 </template>
 <script>
+import { useAuthStore } from "@/stores/auth";
 export default {
     name: "SideBarContent",
+    methods: {
+        logout(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: "Are you sure you want to logout?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, logout!",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const auth = useAuthStore();
+                    auth.logout();
+                }
+            });
+        },
+    },
 };
 </script>

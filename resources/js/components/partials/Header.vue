@@ -39,7 +39,13 @@
                         />
                     </a>
                 </div>
-                <h4>#{{ whmcs_service_id }}&nbsp{{ app_name }}</h4>
+                <h4
+                    v-if="
+                        $route.name != 'app-list' && $route.name != 'app-manage'
+                    "
+                >
+                    #{{ whmcs_service_id }}&nbsp{{ app_name }}
+                </h4>
             </div>
             <div class="main-header-right">
                 <button
@@ -442,12 +448,25 @@ export default {
     methods: {
         logout(e) {
             e.preventDefault();
-            const auth = useAuthStore();
-            auth.logout();
+            Swal.fire({
+                title: "Are you sure you want to logout?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, logout!",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const auth = useAuthStore();
+                    auth.logout();
+                }
+            });
         },
     },
+    created() {
+        console.log(this.$route);
+    },
     computed: {
-
         whmcs_service_id() {
             const auth = useAuthStore();
             return auth.appDetail ? auth.appDetail.id : null;

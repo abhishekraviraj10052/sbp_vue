@@ -42,12 +42,29 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
+                        <!-- Search -->
+                        <div class="d-flex justify-content-end mb-3">
+                            <!-- <div class="w-100 w-md-auto"> -->
+                            <input
+                                v-model="search"
+                                @input="searchData()"
+                                placeholder="Search..."
+                                class="form-control w-300"
+                            />
+                            <!-- </div> -->
+                        </div>
+                        <!-- Search -->
                         <table
                             class="table table-bordered table-hover mb-0 text-md-nowrap"
                         >
                             <thead>
                                 <tr>
-                                    <th>App ID</th>
+                                    <th
+                                        @click="sortBy('id')"
+                                        class="cursor-pointer"
+                                    >
+                                        App ID
+                                    </th>
                                     <th>App Name</th>
                                     <th>App Type</th>
                                     <th>Created On</th>
@@ -93,6 +110,24 @@
                                 ></AppRecords>
                             </tbody>
                         </table>
+                        <!-- Pagination -->
+                        <div class="text-center">
+                            <button
+                                class="btn btn-primary mt-3 mb-0"
+                                :disabled="page === 1"
+                                @click="changePage(page - 1)"
+                            >
+                                Prev
+                            </button>
+                            <button
+                                class="btn btn-primary mt-3 mx-3 mb-0"
+                                :disabled="records.length == 0"
+                                @click="changePage(page + 1)"
+                            >
+                                Next
+                            </button>
+                        </div>
+                        <!-- Pagination -->
                     </div>
                 </div>
             </div>
@@ -103,6 +138,7 @@
 
 <script>
 import axios from "axios";
+// import debounce from "lodash/debounce";
 import { useMessageStore } from "../stores/messageStore";
 
 import BreadCrumb from "../components/bread_crumb/BreadCrumb.vue";
@@ -121,9 +157,53 @@ export default {
             isLoading: false,
             success_msg: "",
             records: [],
+
+            search: "",
+            page: 1,
+            lastPage: 1,
+            sortField: "id",
+            sortDirection: "desc",
         };
     },
     methods: {
+        loadData() {
+            try {
+                this.isLoading = true;
+                axios
+                    .post("/admin/app-list", {
+                        page: this.page,
+                        search: this.search,
+                        sort_field: this.sortField,
+                        sort_direction: this.sortDirection,
+                    })
+                    .then((res) => {
+                        this.records = res.data.records.data;
+                        this.lastPage = res.data.last_page;
+                        this.isLoading = false;
+                    });
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        changePage(page) {
+            this.page = page;
+            this.loadData();
+        },
+        sortBy(field) {
+            if (this.sortField === field) {
+                this.sortDirection =
+                    this.sortDirection === "asc" ? "desc" : "asc";
+            } else {
+                this.sortField = field;
+                this.sortDirection = "asc";
+            }
+
+            this.loadData();
+        },
+        searchData() {
+            this.page = 1;
+            this.loadData();
+        },
         delete(id) {
             axios
                 .post("/admin/app-delete", {
@@ -148,10 +228,15 @@ export default {
             this.success_msg = success.message;
             success.clearMessage();
         }
-        axios.post("/admin/app-list").then((res) => {
-            this.records = res.data.records.data;
-            this.isLoading = false;
-        });
+        this.loadData();
     },
 };
 </script>
+<style>
+.w-300 {
+    width: 300px;
+}
+.cursor-pointer {
+    cursor: pointer;
+}
+</style>
