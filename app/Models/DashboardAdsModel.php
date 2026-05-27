@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class DashboardAdsModel extends Model
 {
-    protected $table = 'dashboard_ads';
+     protected $table = 'dashboard_ads';
      protected $fillable = [
         'title',
         'type',

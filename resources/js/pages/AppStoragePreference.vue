@@ -37,10 +37,13 @@
 										>
 											<input
 												type="radio"
-												class="custom-control-input common_typese"
-												name="preferencetype"
-												value="0"
-												checked=""
+												class="custom-control-input"
+												name="mode"
+												value="local"
+												v-model="form_data.mode"
+												:checked="
+													form_data.mode == 'local'
+												"
 											/>
 											<span class="custom-control-label"
 												><b>Local Storage:</b> Save
@@ -57,9 +60,13 @@
 										>
 											<input
 												type="radio"
-												class="custom-control-input common_typese"
-												name="preferencetype"
-												value="1"
+												class="custom-control-input"
+												name="mode"
+												value="cloud"
+												v-model="form_data.mode"
+												:checked="
+													form_data.mode == 'cloud'
+												"
 											/>
 											<span class="custom-control-label"
 												><b>Cloud Storage:</b> Sync your
@@ -82,12 +89,16 @@
 									value="savestoragepreferences"
 								/>
 								<button
-									type="button"
-									id="savepreferences"
-									value="savestoragepreferences"
-									class="btn custombuttonspaces btn-primary custommr"
+									type="submit"
+									:class="[
+										'btn btn-primary mt-3 mb-0',
+										{ disabled: disabled },
+									]"
+									v-on:click="submit($event)"
 								>
-									Save Changes
+									{{
+										!disabled ? "Submit" : "Please wait..."
+									}}
 								</button>
 							</div>
 
@@ -123,7 +134,7 @@ export default {
 
 			form_data: {
 				id: "",
-				mode: "",
+				mode: "cloud",
 			},
 
 			disabled: false,
@@ -134,27 +145,13 @@ export default {
 		submit(e) {
 			e.preventDefault();
 			this.disabled = true;
-			this.app_name_error = "";
-			this.app_type_error = "";
-			axios.post("/admin/app-manage", this.form_data).then((res) => {
-				this.disabled = false;
-				if (res.data.errors) {
-					if (res.data.msg.app_name) {
-						this.app_name_error = res.data.msg.app_name[0];
-					}
-					if (res.data.msg.app_type) {
-						this.app_type_error = res.data.msg.app_type[0];
-					}
-				} else {
-					if (!this.form_data.id) {
-						const success = useMessageStore();
-						success.setMessage(res.data.msg);
-						this.$router.push({ name: "app-list" });
-					} else {
-						this.success_msg = res.data.msg;
-					}
-				}
-			});
+
+			axios
+				.post("/admin/app-storage-preference-manage", this.form_data)
+				.then((res) => {
+					this.disabled = false;
+					this.success_msg = res.data.msg;
+				});
 		},
 	},
 	mounted() {
@@ -162,15 +159,10 @@ export default {
 		this.whmcs_service_id = auth.appDetail ? auth.appDetail.id : null;
 		this.app_name = auth.appDetail ? auth.appDetail.title : null;
 
-		// axios
-		// 	.post("/admin/app-edit", {
-		// 		id: this.form_data.id,
-		// 	})
-		// 	.then((res) => {
-		// 		this.form_data.id = res.data.record.id;
-		// 		this.form_data.app_name = res.data.record.title;
-		// 		this.form_data.app_type = res.data.record.type;
-		// 	});
+		axios.post("/admin/app-storage-preference-status").then((res) => {
+			this.form_data.id = res.data.record.id;
+			this.form_data.mode = res.data.record.mode;
+		});
 	},
 };
 </script>

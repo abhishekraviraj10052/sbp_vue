@@ -6,7 +6,7 @@
             url="app-manage"
             :add_btn="true"
         ></BreadCrumb>
-        <div class="justify-content-center mt-10">
+        <div class="justify-content-center">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item tx-15">
                     <a

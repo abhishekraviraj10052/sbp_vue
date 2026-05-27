@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\admin\AppController;
+use App\Http\Controllers\admin\AppStoragePreferenceController;
 use App\Http\Controllers\admin\DnsController;
 use App\Http\Controllers\admin\AnnouncementController;
 use App\Http\Controllers\admin\DashboardAdsController;
@@ -76,6 +77,11 @@ Route::group(['prefix' => 'admin'],function(){
     //Maintainence Mode
     Route::post('maintainence-mode-manage',[MaintainenceModeController::class,'manage_maintainence_mode']);
     Route::post('maintainence-mode-status',[MaintainenceModeController::class,'manage_maintainence_status']);
+
+
+    Route::post('app-storage-preference-manage',[AppStoragePreferenceController::class,'manage_app_storage_preference']);
+    Route::post('app-storage-preference-status',[AppStoragePreferenceController::class,'manage_app_storage_status']);
+
 });
 
 

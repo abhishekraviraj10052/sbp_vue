@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('app_storagage_preferences', function (Blueprint $table) {
             $table->id();
+            $table->string('mode');
+            $table->unsignedBigInteger('whmcs_user_id');
+            $table->foreign('whmcs_user_id')->references('id')->on('users');
+            $table->unsignedBigInteger('whmcs_service_id');
+            $table->foreign('whmcs_service_id')->references('id')->on('apps');
             $table->timestamps();
         });
     }
