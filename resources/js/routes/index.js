@@ -27,6 +27,7 @@ import VpnManage from "../pages/VpnManage.vue";
 
 import MaintainenceMode from "../pages/MaintainenceMode.vue";
 import AppStoragePreference from "../pages/AppStoragePreference.vue";
+import AppUpgrade from "../pages/AppUpgrade.vue";
 
 const routes = [
     {
@@ -135,6 +136,12 @@ const routes = [
         path: "/app-storage-preference",
         name: "app-storage-preference",
         component: AppStoragePreference,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: "/app-upgrade",
+        name: "app-upgrade",
+        component: AppUpgrade,
         meta: { requiresAuth: true },
     },
 ];

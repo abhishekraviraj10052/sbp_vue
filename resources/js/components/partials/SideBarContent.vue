@@ -356,6 +356,13 @@
                     class="side-menu__item"
                     data-bs-toggle="slide"
                     href="javascript:;"
+                    v-on:click="
+                        () => {
+                            this.$router.push({
+                                name: 'app-upgrade',
+                            });
+                        }
+                    "
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"

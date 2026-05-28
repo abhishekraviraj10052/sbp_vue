@@ -9,6 +9,7 @@ use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\LoginController;
 use App\Http\Controllers\admin\MaintainenceModeController;
 use App\Http\Controllers\admin\RewardedAdsController;
+use App\Http\Controllers\admin\UpgradeAppController;
 use App\Http\Controllers\admin\VpnController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -81,6 +82,9 @@ Route::group(['prefix' => 'admin'],function(){
 
     Route::post('app-storage-preference-manage',[AppStoragePreferenceController::class,'manage_app_storage_preference']);
     Route::post('app-storage-preference-status',[AppStoragePreferenceController::class,'manage_app_storage_status']);
+
+    Route::any('app-version-manage',[UpgradeAppController::class,'manage_app_version']);
+    Route::any('app-version-delete',[UpgradeAppController::class,'delete_app_version']);
 
 });
 
