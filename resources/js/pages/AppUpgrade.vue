@@ -65,7 +65,7 @@
                         <div v-show="has_apk_file" class="mt-3">
                             <span class=""> Current APK File :</span>
                             &nbsp;
-                            <i class="fa fa-download"></i>
+                            <i class="fa fa-download" v-on:click="handle_download(id)"></i>
                             &nbsp;
                             <i
                                 class="fa fa-edit"
@@ -230,6 +230,45 @@ export default {
                 });
             });
             //Upload apk end
+        },
+        handle_download(id) {
+            Swal.fire({
+                title: "Are you sure you want to download this APK file?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, download it!",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    try {
+                        axios
+                            .get(`admin/apk-download/${id}`, {
+                                responseType: "blob",
+                            })
+                            .then((response) => {
+                                const blob = new Blob([response.data], {
+                                    type: "application/vnd.android.package-archive",
+                                });
+
+                                const url = window.URL.createObjectURL(blob);
+
+                                const link = document.createElement("a");
+                                link.href = url;
+                                link.download = this.apk_file_name + ".apk";
+
+                                document.body.appendChild(link);
+                                link.click();
+
+                                document.body.removeChild(link);
+
+                                window.URL.revokeObjectURL(url);
+                            });
+                    } catch (error) {
+                        console.error(error);
+                    }
+                }
+            });
         },
         deleteApkFile() {
             Swal.fire({

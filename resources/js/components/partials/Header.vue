@@ -385,11 +385,11 @@
                                                 <h6
                                                     class="tx-15 font-weight-semibold mb-0"
                                                 >
-                                                    Teri Dactyl
+                                                   Welcome
                                                 </h6>
                                                 <span
                                                     class="dropdown-title-text subtext op-6 tx-12"
-                                                    >Premium Member</span
+                                                    >{{ username }}</span
                                                 >
                                             </div>
                                         </div>
@@ -398,22 +398,22 @@
                                         ><i class="far fa-user-circle"></i
                                         >Profile</a
                                     >
-                                    <a class="dropdown-item" href="chat.html"
-                                        ><i class="far fa-smile"></i> chat</a
-                                    >
                                     <a
                                         class="dropdown-item"
-                                        href="mail-read.html"
-                                        ><i class="far fa-envelope"></i>Inbox</a
-                                    >
-                                    <a class="dropdown-item" href="mail.html"
-                                        ><i class="far fa-comment-dots"></i
-                                        >Messages</a
-                                    >
-                                    <a
-                                        class="dropdown-item"
-                                        href="mail-settings.html"
-                                        ><i class="far fa-sun"></i> Settings</a
+                                        href="javascript:;"
+                                        v-on:click="
+                                            () => {
+                                                this.$router.push({
+                                                    name: '2fa-manage',
+                                                });
+                                            }
+                                        "
+                                        style="cursor: pointer"
+                                        ><i
+                                            class="fa fa-key"
+                                            aria-hidden="true"
+                                        ></i
+                                        >2FA Settings</a
                                     >
                                     <a
                                         class="dropdown-item"
@@ -441,6 +441,7 @@ export default {
     name: "Header",
     data() {
         return {
+            username: "",
             whmcs_service_id: "",
             app_name: "",
         };
@@ -463,10 +464,11 @@ export default {
             });
         },
     },
-    created() {
-        console.log(this.$route);
-    },
     computed: {
+        username() {
+            const auth = useAuthStore();
+            return auth.userDetail ? auth.userDetail.firstname : "User";
+        },
         whmcs_service_id() {
             const auth = useAuthStore();
             return auth.appDetail ? auth.appDetail.id : null;

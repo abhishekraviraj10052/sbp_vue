@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use App\Models\UpgradeAppModel;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Storage;
 
 class UpgradeAppController extends Controller
 {
@@ -111,7 +111,7 @@ class UpgradeAppController extends Controller
                     'record' => 'done'
                 ]);
             }
-        }else{
+        } else {
             $record = UpgradeAppModel::where('whmcs_user_id', Auth::user()->id)->where('whmcs_service_id', $request->session()->get('whmcs_service_id'))->first();
             return response()->json([
                 'record' => $record
@@ -129,9 +129,9 @@ class UpgradeAppController extends Controller
                     unlink($filePath);
                 }
                 $record->delete();
-                return response()->json(['errors' => false,'message' => 'Apk deleted successfully']);
+                return response()->json(['errors' => false, 'message' => 'Apk deleted successfully']);
             } else {
-                return response()->json(['errors' => true,'message' => 'Record not found'], 404);
+                return response()->json(['errors' => true, 'message' => 'Record not found'], 404);
             }
         }
     }
@@ -140,7 +140,7 @@ class UpgradeAppController extends Controller
 
     function getApkVersionDetails($apkFilePath)
     {
-        $packageName ='com.example.app';
+        $packageName = 'com.example.app';
         $versionName = 1.0;
         $versionCode = 100;
         return [
@@ -190,5 +190,29 @@ class UpgradeAppController extends Controller
             'versionName' => $versionName,
             'versionCode' => $versionCode,
         ];
+    }
+
+
+    public function downloadApkFile(Request $request, $id)
+    {
+        $apkFileObj = UpgradeAppModel::findOrFail($id);
+        $filePath = storage_path(
+            'app/uploads/apk_folder_' .
+                $request->session()->get('whmcs_service_id') .
+                '/' .
+                $apkFileObj->apk_file_name
+        );
+
+        if (!file_exists($filePath)) {
+            abort(404, 'File not found');
+        }
+
+        return response()->download(
+            $filePath,
+            $apkFileObj->file_name . '.apk',
+            [
+                'Content-Type' => 'application/vnd.android.package-archive'
+            ]
+        );
     }
 }

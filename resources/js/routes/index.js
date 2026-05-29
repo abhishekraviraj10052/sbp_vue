@@ -29,6 +29,8 @@ import MaintainenceMode from "../pages/MaintainenceMode.vue";
 import AppStoragePreference from "../pages/AppStoragePreference.vue";
 import AppUpgrade from "../pages/AppUpgrade.vue";
 
+import TwoFaSetting from "../pages/TwoFaSetting.vue";
+
 const routes = [
     {
         path: "/",
@@ -142,6 +144,12 @@ const routes = [
         path: "/app-upgrade",
         name: "app-upgrade",
         component: AppUpgrade,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: "/2fa-manage",
+        name: "2fa-manage",
+        component: TwoFaSetting,
         meta: { requiresAuth: true },
     },
 ];

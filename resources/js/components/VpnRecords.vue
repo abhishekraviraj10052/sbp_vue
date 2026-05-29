@@ -95,7 +95,7 @@ export default {
                 if (result.isConfirmed) {
                     try {
                         axios
-                            .get(`/vpn-download/${id}`, {
+                            .get(`admin/vpn-download/${id}`, {
                                 responseType: "blob",
                             })
                             .then((response) => {

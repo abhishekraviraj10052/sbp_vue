@@ -9,6 +9,7 @@ use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\LoginController;
 use App\Http\Controllers\admin\MaintainenceModeController;
 use App\Http\Controllers\admin\RewardedAdsController;
+use App\Http\Controllers\admin\TwoFaController;
 use App\Http\Controllers\admin\UpgradeAppController;
 use App\Http\Controllers\admin\VpnController;
 use Illuminate\Http\Request;
@@ -86,9 +87,16 @@ Route::group(['prefix' => 'admin'],function(){
 
     Route::any('app-version-manage',[UpgradeAppController::class,'manage_app_version']);
     Route::any('app-version-delete',[UpgradeAppController::class,'delete_app_version']);
+    Route::get('apk-download/{id}',[UpgradeAppController::class,'downloadApkFile']);
+
+
+    //2Fa routes
+    Route::post('2fa-generate',[TwoFaController::class,'generate2faSecret']);
+    Route::post('2fa-verify-otp',[TwoFaController::class,'verify_2fa_otp']);
+    Route::post('2fa-verify-login',[TwoFaController::class,'verify_2fa_login']);
+
 
 });
-
 
 Route::get('/{any?}', function () { return view('layout'); })->where('any', '.*');
 
