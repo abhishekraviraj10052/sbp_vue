@@ -131,7 +131,7 @@ class UpgradeAppController extends Controller
                 $record->delete();
                 return response()->json(['errors' => false,'message' => 'Apk deleted successfully']);
             } else {
-                return response()->json(['message' => 'Record not found'], 404);
+                return response()->json(['errors' => true,'message' => 'Record not found'], 404);
             }
         }
     }

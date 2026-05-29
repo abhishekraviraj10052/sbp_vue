@@ -37,6 +37,7 @@
                                 name="title"
                                 value=""
                                 class="form-control title_input"
+                                v-model="form_data.title"
                             />
                         </div>
                         <div class="form-group" bis_skin_checked="1">
@@ -62,6 +63,7 @@
                                 class="far fa-eye"
                                 id="togglePassword"
                                 style="margin-left: -40px; cursor: pointer"
+                                v-on:click="togglePassword"
                             ></i>
                         </div>
                         <div class="form-group" bis_skin_checked="1">
@@ -140,6 +142,12 @@ export default {
             this.form_data.file = event.target.files[0];
             console.log(this.form_data.file);
         },
+        togglePassword() {
+            const passwordInput = document.getElementById("togglePassword").previousElementSibling;
+            if (passwordInput) {
+                passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+            }
+        },
         submit(e) {
             e.preventDefault();
             this.disabled = true;
@@ -184,15 +192,15 @@ export default {
         this.form_data.id = this.$route.params?.id;
         if (this.form_data.id) {
             axios
-                .post("/admin/vpn-ads-edit", {
+                .post("/admin/vpn-edit", {
                     id: this.form_data.id,
                 })
                 .then((res) => {
                     this.form_data.id = res.data.record.id;
                     this.form_data.title = res.data.record.title;
-                    this.form_data.message = res.data.record.username;
-                    this.form_data.files = res.data.record.password ?? [];
-                    this.form_data.status = res.data.record.status;
+                    this.form_data.username = res.data.record.username;
+                    this.form_data.password =
+                        res.data.record.shareable_password;
                 });
         }
     },
@@ -204,5 +212,8 @@ export default {
     right: 25px;
     margin-top: -27px;
     font-size: 15px;
+}
+.form-control {
+    color: #000;
 }
 </style>

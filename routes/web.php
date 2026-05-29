@@ -74,6 +74,7 @@ Route::group(['prefix' => 'admin'],function(){
     Route::post('vpn-manage',[VpnController::class,'manage_vpn']);
     Route::post('vpn-edit',[VpnController::class,'edit_vpn']);
     Route::post('vpn-delete',[VpnController::class,'delete_vpn']);
+    Route::get('vpn-download/{id}',[VpnController::class,'downloadVpnFile']);
 
     //Maintainence Mode
     Route::post('maintainence-mode-manage',[MaintainenceModeController::class,'manage_maintainence_mode']);

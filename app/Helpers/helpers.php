@@ -3,7 +3,7 @@ if (!function_exists('aes_encrypt')) {
 
     function aes_encrypt($plainText)
     {
-        $saltSecret = env('ENCRYPTIONSALT');
+        $saltSecret = env('ENCRYPTION_SALT');
         if ($saltSecret === '') {
             throw new InvalidArgumentException('saltSecret cannot be empty');
         }
@@ -50,7 +50,7 @@ if (!function_exists('aes_decrypt')) {
 
     function aes_decrypt($encryptedText)
     {
-        $saltSecret = env('ENCRYPTIONSALT');
+        $saltSecret = env('ENCRYPTION_SALT');
         try {
             if ($saltSecret === '') {
                 return false;

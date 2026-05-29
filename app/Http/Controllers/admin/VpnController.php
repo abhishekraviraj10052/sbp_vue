@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\VpnModel;
 use ZipArchive;
 use Illuminate\Support\Facades\Auth;
-
+use StreamBucket;
 
 class VpnController extends Controller
 {
@@ -24,38 +24,47 @@ class VpnController extends Controller
 
     public function list_vpn(Request $request)
     {
-            $query = VpnModel::query();
-            if ($request->search) {
-                
-                $query->where(function ($q) use ($request) {
-                    $q->where('title', 'like', '%' . $request->search . '%')
-                      ->orWhere('type', 'like', '%' . $request->search . '%');
-                });
+        $query = VpnModel::query();
+        if ($request->search) {
 
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                    ->orWhere('type', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $sortField = $request->sort_field ?? 'id';
+        $sortDirection = $request->sort_direction ?? 'desc';
+        $query->orderBy($sortField, $sortDirection);
+
+        $records = $query->paginate(10);
+        $records->getCollection()->transform(function ($record) {
+            if ($record->type === 'image') {
+                $record->filepath = explode(',', $record->filepath);
             }
 
-            $sortField = $request->sort_field ?? 'id';
-            $sortDirection = $request->sort_direction ?? 'desc';
-            $query->orderBy($sortField, $sortDirection);
+            $record->shareable_password = aes_decrypt($record->shareable_password);
+            return $record;
+        });
 
-            $records = $query->paginate(10);
-            foreach ($records as $index =>  $record) {
-                if ($record->type == 'image') {
-                    $record->filepath = explode(',', $record->filepath);
-                }
-            };
-            return response()->json([
-                'errors' => false,
-                'records' => $records
-            ]);
+        return response()->json([
+            'errors' => false,
+            'records' => $records
+        ]);
     }
 
     public function manage_vpn(Request $request, Response $response)
     {
 
 
+        $file_validation = '';
+        if ($request['id'] == '') {
+            $file_validation = 'required|file|max:10240';
+        } else {
+            $file_validation = 'nullable|file|max:10240';
+        }
         $validator = Validator::make($request->all(), [
-            'file' => 'required|file|max:10240'
+            'file' => $file_validation,
         ], [
             'file.required' => 'The file field is required.',
         ]);
@@ -69,30 +78,34 @@ class VpnController extends Controller
         }
 
         $allowedExtensions = ['ovpn', 'zip'];
-
         $file = $request->file('file');
 
-        $extension = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
-        if (!in_array($extension, $allowedExtensions)) {
-            return response()->json(['errors' => true, 'msg' => ['file' => ['The file must be an .ovpn or zip file.']]]);
-        }
-        $filePath = $file->getRealPath();
-        $fileContent = file_get_contents($filePath);
-
-        if ($file && $file->getClientOriginalExtension() != 'zip') {
-            if (!$this->isValidVpnContent($fileContent)) {
-                return response()->json(['errors' => true, 'msg' => ['file' => ['The file must be a valid .ovpn file.']]]);
-            }
-        }
-
-
+        $title = '';
         $zip_contents = [];
-        if ($file && $file->getClientOriginalExtension() === 'zip') {
-            $path = $file->getRealPath();
-            $zip_contents = $this->getZipContent($path);
+        if ($file) {
+            $extension = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+            if (!in_array($extension, $allowedExtensions)) {
+                return response()->json(['errors' => true, 'msg' => ['file' => ['The file must be an .ovpn or zip file.']]]);
+            }
+            $filePath = $file->getRealPath();
+            $fileContent = file_get_contents($filePath);
+
+            if ($file && $file->getClientOriginalExtension() != 'zip') {
+                if (!$this->isValidVpnContent($fileContent)) {
+                    return response()->json(['errors' => true, 'msg' => ['file' => ['The file must be a valid .ovpn file.']]]);
+                }
+            }
+
+            if ($file && $file->getClientOriginalExtension() === 'zip') {
+                $path = $file->getRealPath();
+                $zip_contents = $this->getZipContent($path);
+            }
+
+            $title = $request['title'] ?? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         }
 
-        $title = $request['title'] ?? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+
 
         $password = (!empty(trim($request['password']))) ? Hash::make($request['password']) : '';
         $shareable_password = (!empty(trim($request['password']))) ? aes_encrypt($request['password']) : '';
@@ -142,12 +155,12 @@ class VpnController extends Controller
                 }
             }
         } else {
-
+            $vpn_record = $this->vpn_model->where('id', $request['id'])->first();
             if ($this->vpn_model->where('id', $request['id'])->update([
-                'title' => $request['title'],
-                'username' => $request['username'],
-                'password' => $password,
-                'shareable_password' => $shareable_password,
+                'title' => $request['title'] ?? $vpn_record->title,
+                'username' => $request['username'] ?? $vpn_record->username,
+                'password' => $password ?? $vpn_record->password,
+                'shareable_password' => $shareable_password ?? $vpn_record->shareable_password,
                 'whmcs_user_id' => Auth::user()->id,
                 'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                 'updated_at' => date('Y-m-d H:i:s')
@@ -168,11 +181,11 @@ class VpnController extends Controller
     public function edit_vpn(Request $request)
     {
 
-        $record = $this->vpn_model->find($request['id']);
-        if ($record->filepath != '') {
-            $record->filepath = explode(',', $record->filepath);
+        $record = $this->vpn_model->where('id', $request['id'])->first();
+        if ($record->shareable_password != '') {
+            $record->shareable_password = aes_decrypt($record->shareable_password);
         } else {
-            $record->filepath = [];
+            $record->shareable_password = 'n/A';
         }
 
         return response()->json([
@@ -263,5 +276,15 @@ class VpnController extends Controller
             }
         }
         return true;
+    }
+
+
+    public function downloadVpnFile($id)
+    {
+        $record = $this->vpn_model::findOrFail($id);
+        $fileName = $record->title ?? 'config.ovpn';
+        return response($record->file_content)
+            ->header('Content-Type', 'application/x-openvpn-profile')
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
     }
 }

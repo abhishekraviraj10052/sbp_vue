@@ -20,7 +20,34 @@
             <div class="card box-shadow-0 mt-5 pt-4">
                 <div class="card-body pt-0">
                     <form>
-                        <div class="form-group" v-if="!has_apk_file">
+                        <div
+                            class="form-group"
+                            v-if="has_apk_file && !is_editable"
+                        >
+                            <label>Apk Version Name</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                v-model="apk_version_name"
+                                disabled
+                            />
+                        </div>
+                        <div
+                            class="form-group"
+                            v-if="has_apk_file && !is_editable"
+                        >
+                            <label>Apk Version Code</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                v-model="apk_version_code"
+                                disabled
+                            />
+                        </div>
+                        <div
+                            class="form-group"
+                            v-if="!has_apk_file || is_editable"
+                        >
                             <label>Apk File</label>
                             <input
                                 type="file"
@@ -35,21 +62,20 @@
                                 apk_file_error
                             }}</span>
                         </div>
-                        <div class="form-group" v-if="has_apk_file">
-                            <label>Apk Version Name</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                v-model="apk_version_name"
-                            />
-                        </div>
-                        <div class="form-group" v-if="has_apk_file">
-                            <label>Apk Version Code</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                v-model="apk_version_code"
-                            />
+                        <div v-show="has_apk_file" class="mt-3">
+                            <span class=""> Current APK File :</span>
+                            &nbsp;
+                            <i class="fa fa-download"></i>
+                            &nbsp;
+                            <i
+                                class="fa fa-edit"
+                                v-on:click="is_editable = !is_editable"
+                            ></i>
+                            &nbsp;
+                            <i
+                                class="fa fa-trash"
+                                v-on:click="deleteApkFile"
+                            ></i>
                         </div>
                         <div class="form-group">
                             <button
@@ -59,7 +85,7 @@
                                     { disabled: disabled },
                                 ]"
                                 v-on:click="submit"
-                                v-if="!has_apk_file"
+                                v-if="!has_apk_file || is_editable"
                             >
                                 {{ !disabled ? "Submit" : "Please wait..." }}
                             </button>
@@ -83,21 +109,6 @@
                             <span v-if="uploadPercentage > 0">
                                 {{ uploadPercentage }}%
                             </span>
-                        </div>
-                        <div v-show="has_apk_file" class="mt-3">
-                            <span class=""> Current APK File :</span>
-                            &nbsp;
-                            <i class="fa fa-download"></i>
-                            &nbsp;
-                            <i
-                                class="fa fa-edit"
-                                v-on:click="has_apk_file = !has_apk_file"
-                            ></i>
-                            &nbsp;
-                            <i
-                                class="fa fa-trash"
-                                v-on:click="deleteApkFile"
-                            ></i>
                         </div>
                     </form>
                 </div>
@@ -133,6 +144,7 @@ export default {
             apk_file_error: "",
             selected_file: null,
             has_apk_file: false,
+            is_editable: false,
             disabled: false,
             success_msg: "",
             uploadPercentage: 0,
@@ -193,8 +205,10 @@ export default {
                     });
                 }
             } catch (error) {
-                this.apk_file_error = error;
+                this.selected_file = null;
                 this.disabled = false;
+                this.uploadPercentage = 0;
+                this.apk_file_error = error;
                 return;
             }
 
@@ -204,13 +218,15 @@ export default {
                 showConfirmButton: false,
                 timer: 1500,
             }).then(async () => {
+                this.selected_file = null;
                 this.disabled = false;
+                this.uploadPercentage = 0;
                 await axios.get("admin/app-version-manage").then((res) => {
                     this.id = res.data.record?.id;
                     this.apk_version_name = res.data.record?.apk_version_name;
                     this.apk_version_code = res.data.record?.apk_version_code;
                     this.has_apk_file = this.id ? true : false;
-                    this.uploadPercentage = 0;
+                    this.is_editable = this.id ? false : true;
                 });
             });
             //Upload apk end
@@ -239,6 +255,7 @@ export default {
                                     "success",
                                 );
                                 this.id = null;
+                                this.selected_file = null;
                                 this.apk_version_name = "";
                                 this.apk_version_code = "";
                                 this.has_apk_file = false;

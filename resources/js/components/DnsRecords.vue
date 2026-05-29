@@ -3,7 +3,7 @@
         <th scope="row">{{ record.id }}</th>
         <td>{{ record.name }}</td>
         <td>{{ record.dns }}</td>
-        <td>
+        <td class="text-center">
             <button
                 class="btn btn-success mx-1"
                 v-on:click="
