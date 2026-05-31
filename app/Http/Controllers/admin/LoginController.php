@@ -43,6 +43,7 @@ class LoginController extends Controller
     public function authCheck(Request $request)
     {
         if (Auth::check()) {
+            Auth::user()->is_2fa_verified = $request->session()->get('is_2fa_verified')?true:false;
             return response()->json([
                 "errors" => false,
                 "user" => Auth::user()

@@ -41,7 +41,9 @@
                 </div>
                 <h4
                     v-if="
-                        $route.name != 'app-list' && $route.name != 'app-manage'
+                        $route.name != 'app-list' &&
+                        $route.name != 'app-manage' &&
+                        $route.name != '2fa-manage'
                     "
                 >
                     #{{ whmcs_service_id }}&nbsp{{ app_name }}
@@ -385,7 +387,7 @@
                                                 <h6
                                                     class="tx-15 font-weight-semibold mb-0"
                                                 >
-                                                   Welcome
+                                                    Welcome
                                                 </h6>
                                                 <span
                                                     class="dropdown-title-text subtext op-6 tx-12"

@@ -91,9 +91,18 @@ Route::group(['prefix' => 'admin'],function(){
 
 
     //2Fa routes
-    Route::post('2fa-generate',[TwoFaController::class,'generate2faSecret']);
+    Route::post('2fa-generate',[TwoFaController::class,'generate_2fa_secret']);
     Route::post('2fa-verify-otp',[TwoFaController::class,'verify_2fa_otp']);
     Route::post('2fa-verify-login',[TwoFaController::class,'verify_2fa_login']);
+
+    Route::post('2fa-disable',[TwoFaController::class,'disable_2fa']);
+    Route::post('backup-code-reset',[TwoFaController::class,'reset_backup_code']);
+    Route::post('backup-code-download',[TwoFaController::class,'download_backup_code']);
+
+
+
+
+    
 
 
 });

@@ -30,6 +30,7 @@ import AppStoragePreference from "../pages/AppStoragePreference.vue";
 import AppUpgrade from "../pages/AppUpgrade.vue";
 
 import TwoFaSetting from "../pages/TwoFaSetting.vue";
+import TwoFaLogin from "../pages/TwoFaLogin.vue";
 
 const routes = [
     {
@@ -152,6 +153,12 @@ const routes = [
         component: TwoFaSetting,
         meta: { requiresAuth: true },
     },
+    {
+        path: "/2fa-login",
+        name: "2fa-login",
+        component: TwoFaLogin,
+        meta: { requiresAuth: true },
+    },
 ];
 
 const router = createRouter({
@@ -178,12 +185,22 @@ router.beforeEach(async (to, from, next) => {
         }
     }
 
-    if (to.meta.requiresAuth && auth.userDetail === null) {
-        return next("/");
+    if (to.meta.requiresAuth) {
+        if (auth.userDetail === null) {
+            return next("/");
+        }
+        if (
+            auth.userDetail.is_2fa_enabled &&
+            !auth.userDetail.is_2fa_verified &&
+            to.path !== "/2fa-login"
+        ) {
+            return next("/2fa-login");
+        }
     }
-
-    // if (to.meta.requiresGuest && auth.userDetail !== null) {
-    //     return next("/app-list");
+    // else {
+    //     if (auth.userDetail !== null && !auth.userDetail.is_2fa_enabled) {
+    //         return next("/app-list");
+    //     }
     // }
 
     next();

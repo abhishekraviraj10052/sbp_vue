@@ -3,7 +3,7 @@
         <aside class="app-sidebar">
             <div class="main-sidebar-header active">
                 <a class="header-logo active text-dark" href="javascript:;">
-                    <h4>SBP Panel</h4>
+                    <h4 class="text-center">SBP Panel</h4>
                 </a>
             </div>
             <SideBarContent></SideBarContent>
@@ -12,12 +12,11 @@
 </template>
 
 <script>
-
-import SideBarContent from './SideBarContent.vue';
+import SideBarContent from "./SideBarContent.vue";
 export default {
     name: "SideBar",
     components: {
-        SideBarContent
+        SideBarContent,
     },
     data() {
         return {
@@ -34,6 +33,7 @@ export default {
 .sticky {
     position: sticky;
     top: 0;
+    z-index: 9999;
 }
 
 .app-sidebar {

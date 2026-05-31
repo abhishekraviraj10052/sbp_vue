@@ -211,6 +211,8 @@ export default {
                     if (res.data.msg.auth_error) {
                         this.auth_error = res.data.msg.auth_error;
                     }
+                } else if (res.data.user?.is_2fa_enabled) {
+                    this.$router.push({ name: "2fa-login" });
                 } else {
                     this.$router.push({ name: "app-list" });
                 }

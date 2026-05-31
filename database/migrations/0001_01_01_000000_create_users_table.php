@@ -20,6 +20,9 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('role', ['admin', 'user'])->default('user');
+            $table->string('google2fa_secret')->nullable();
+            $table->string('google2fa_backup_code')->nullable();
+            $table->boolean('is_2fa_enabled')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });
