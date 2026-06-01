@@ -212,9 +212,12 @@ router.beforeEach(async (to, from, next) => {
             return next("/2fa-login");
         }
         if (
-            auth.userDetail.is_2fa_enabled &&
-            auth.userDetail.is_2fa_verified &&
-            to.path === "/2fa-login"
+            (auth.userDetail.is_2fa_enabled &&
+                auth.userDetail.is_2fa_verified &&
+                to.path === "/2fa-login") ||
+            (!auth.userDetail.is_2fa_enabled &&
+                !auth.userDetail.is_2fa_verified &&
+                to.path === "/2fa-login")
         ) {
             return next("/app-list");
         }

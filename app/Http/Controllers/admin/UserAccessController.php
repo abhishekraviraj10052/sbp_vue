@@ -14,12 +14,13 @@ class UserAccessController extends Controller
 {
     public function list_user_access(Request $request)
     {
-        $query = User::where('role', 'user');
-        if ($request->search) {
+       $query = User::with('accesses.app')->where('role', 'user');
 
+       if ($request->search) {
             $query->where(function ($q) use ($request) {
-                $q->where('title', 'like', '%' . $request->search . '%')
-                    ->orWhere('type', 'like', '%' . $request->search . '%');
+                $q->where('email', 'like', '%' . $request->search . '%')
+                  ->orWhere('firstname', 'like', '%' . $request->search . '%')
+                  ->orWhere('lastname', 'like', '%' . $request->search . '%');
             });
         }
 
@@ -28,6 +29,7 @@ class UserAccessController extends Controller
         $query->orderBy($sortField, $sortDirection);
 
         $records = $query->paginate(10);
+
         return response()->json([
             'errors' => false,
             'records' => $records
@@ -70,15 +72,15 @@ class UserAccessController extends Controller
             $user_id = $user->id;
         }
 
-        UserAccessModel::updateOrCreate(
-            ['user_id' => $user_id],
-            [
+    
+        foreach($request['apps'] as $app_id){
+            UserAccessModel::insert([
+                'user_id' => $user_id,
                 'whmcs_user_id' => auth()->user()->id,
-                'apps' => json_encode($request['apps']),
+                'app_id' => $app_id,
                 'status' => 'inactive',
-
-            ]
-        );
+            ]);
+        }
 
         return response()->json([
             'errors' => false,

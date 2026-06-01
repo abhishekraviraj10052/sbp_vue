@@ -8,4 +8,13 @@ class UserAccessModel extends Model
 {
     protected $table = 'user_access';
     protected $fillable = ['user_id', 'whmcs_user_id', 'apps', 'status'];
+
+
+
+
+    public function app()
+    {
+        return $this->belongsTo(AppModel::class, 'app_id');
+    }
+
 }

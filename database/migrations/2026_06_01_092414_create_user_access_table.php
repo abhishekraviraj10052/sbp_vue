@@ -18,7 +18,8 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users');
             $table->unsignedBigInteger('whmcs_user_id');
             $table->foreign('whmcs_user_id')->references('id')->on('users');
-            $table->string('apps');
+            $table->unsignedBigInteger('app_id');
+            $table->foreign('app_id')->references('id')->on('apps');
             $table->string('status')->default('inactive');
             $table->timestamps();
         });

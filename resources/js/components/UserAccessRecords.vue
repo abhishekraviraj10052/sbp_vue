@@ -11,10 +11,24 @@
             class="cursor-pointer"
             v-on:click="this.redirectToAppDetail(record.id)"
         >
-            {{ record.title }}
+            {{ record.email }}
         </td>
-        <td>{{ record.type }}</td>
-        <td>{{ record.created_at }}</td>
+        <td>
+            <span v-for="access in record.accesses" :key="access.app_id">
+                #{{ access.app_id }} {{ access.app.title }}
+                <br />
+            </span>
+        </td>
+        <td>
+            <span
+                v-if="record.accesses?.[0]?.status === 'inactive'"
+                class="badge badge-danger"
+            >
+                Inactive
+            </span>
+
+            <span v-else class="badge badge-success"> Active </span>
+        </td>
         <td>
             <button
                 class="btn btn-success"
@@ -41,7 +55,6 @@
     </tr>
 </template>
 <script>
-
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
 export default {
@@ -58,7 +71,7 @@ export default {
         async redirectToAppDetail(id) {
             const auth = useAuthStore();
             await auth.getAppDetail(id);
-            this.$router.push({ name: "app-detail"});
+            this.$router.push({ name: "app-detail" });
         },
         handle_delete(id) {
             Swal.fire({
