@@ -35,9 +35,9 @@ class TwoFaController extends Controller
 
     public function verify_2fa_otp(Request $request)
     {
-       
+
         $validator = Validator::make($request->all(), [
-           'otp' => 'required'
+            'otp' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -49,41 +49,42 @@ class TwoFaController extends Controller
 
         $google2fa = new Google2FA();
         $user = auth()->user();
-        if($user->google2fa_secret == ''){
+        if ($user->google2fa_secret == '') {
             return response()->json([
                 "errors" => true,
                 "msg" => ['otp' => ['Invalid OTP']]
             ]);
-        }
-        $valid = $google2fa->verifyKey(
-            aes_decrypt($user->google2fa_secret),
-            $request['otp']
-        );
+        } else {
+            $valid = $google2fa->verifyKey(
+                aes_decrypt($user->google2fa_secret),
+                $request['otp']
+            );
 
-        if (!$valid) {
-            return response()->json([
-                "errors" => true,
-                "msg" => ['otp' => ['Invalid OTP']]
-            ]);
+            if (!$valid) {
+                return response()->json([
+                    "errors" => true,
+                    "msg" => ['otp' => ['Invalid OTP']]
+                ]);
+            }
+
+            $google2fa_backup_code =
+                strtoupper(Str::random(4))
+                . '-' . strtoupper(Str::random(4))
+                . '-' . strtoupper(Str::random(4))
+                . '-' . strtoupper(Str::random(4));
+
+            $user->google2fa_backup_code = aes_encrypt($google2fa_backup_code);
+            $user->is_2fa_enabled = true;
+            $request->session()->put('is_2fa_verified', true);
+            $user->save();
+            return response()->json(['errors' => false, 'google2fa_backup_code' => $google2fa_backup_code, 'msg' => '2FA enabled successfully']);
         }
-        
-        $google2fa_backup_code = 
-        strtoupper(Str::random(4)) 
-        . '-' . strtoupper(Str::random(4)) 
-        . '-' . strtoupper(Str::random(4)) 
-        .'-' . strtoupper(Str::random(4));
-        
-        $user->google2fa_backup_code = aes_encrypt($google2fa_backup_code);
-        $user->is_2fa_enabled = true;
-        $request->session()->put('is_2fa_verified',true);
-        $user->save();
-        return response()->json(['errors' => false, 'google2fa_backup_code' => $google2fa_backup_code, 'msg' => '2FA enabled successfully']);
     }
 
-    public function verify_2fa_login(Request $request)
+    public function two_fa_login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-           'otp' => 'required'
+            'otp' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -94,7 +95,7 @@ class TwoFaController extends Controller
         }
 
         $user = auth()->user();
-        if($user->google2fa_secret == ''){
+        if ($user->google2fa_secret == '') {
             return response()->json([
                 "errors" => true,
                 "msg" => ['otp' => ['Invalid OTP']]
@@ -107,34 +108,62 @@ class TwoFaController extends Controller
                 "msg" => ['otp' => ['Invalid OTP']]
             ]);
         }
-        $request->session()->put('is_2fa_verified',true);
+        $request->session()->put('is_2fa_verified', true);
         $user->is_2fa_verified = $request->session()->get('is_2fa_verified');
         return response()->json(['errors' => false, 'user' => $user, 'msg' => 'Login successful']);
     }
 
-    public function disable_2fa(){
+    public function two_fa_login_with_backup_code(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'otp' => 'required'
+        ], [
+            'otp.required' => 'Backup code is required.'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "errors" => true,
+                "msg" => $validator->errors()
+            ]);
+        }
+
+        $user = auth()->user();
+        if ($request['otp'] == aes_decrypt($user->google2fa_backup_code)) {
+            $request->session()->put('is_2fa_verified', true);
+            $user->is_2fa_verified = $request->session()->get('is_2fa_verified');
+            return response()->json(['errors' => false, 'user' => $user, 'msg' => 'Login successful']);
+        } else {
+            return response()->json([
+                "errors" => true,
+                "msg" => ['otp' => ['Invalid backup code']]
+            ]);
+        }
+    }
+
+    public function disable_2fa()
+    {
         $user = auth()->user();
         $user->google2fa_secret = '';
-        $user->google2fa_backup_code= '';
+        $user->google2fa_backup_code = '';
         $user->is_2fa_enabled = false;
         $user->save();
         return response()->json(['errors' => false, 'msg' => '2FA disabled successfully']);
-
     }
 
 
-    public function reset_backup_code(){
+    public function reset_backup_code()
+    {
         $user = auth()->user();
-        $google2fa_backup_code = 
-        strtoupper(Str::random(4)) 
-        . '-' . strtoupper(Str::random(4)) 
-        . '-' . strtoupper(Str::random(4)) 
-        .'-' . strtoupper(Str::random(4));
-        
+        $google2fa_backup_code =
+            strtoupper(Str::random(4))
+            . '-' . strtoupper(Str::random(4))
+            . '-' . strtoupper(Str::random(4))
+            . '-' . strtoupper(Str::random(4));
+
         $user->google2fa_backup_code = aes_encrypt($google2fa_backup_code);
         $user->save();
         return response()->json(['errors' => false, 'msg' => 'Backup code reset successfully']);
-
     }
 
     public function download_backup_code()

@@ -31,6 +31,9 @@ import AppUpgrade from "../pages/AppUpgrade.vue";
 
 import TwoFaSetting from "../pages/TwoFaSetting.vue";
 import TwoFaLogin from "../pages/TwoFaLogin.vue";
+import UserAccessList from "../pages/UserAccessList.vue";
+
+import UserAccessManage from "../pages/UserAccessManage.vue";
 
 const routes = [
     {
@@ -159,6 +162,18 @@ const routes = [
         component: TwoFaLogin,
         meta: { requiresAuth: true },
     },
+    {
+        path: "/user-access-list",
+        name: "user-access-list",
+        component: UserAccessList,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: "/user-access-manage/:id?",
+        name: "user-access-manage",
+        component: UserAccessManage,
+        meta: { requiresAuth: true },
+    },
 ];
 
 const router = createRouter({
@@ -196,12 +211,18 @@ router.beforeEach(async (to, from, next) => {
         ) {
             return next("/2fa-login");
         }
+        if (
+            auth.userDetail.is_2fa_enabled &&
+            auth.userDetail.is_2fa_verified &&
+            to.path === "/2fa-login"
+        ) {
+            return next("/app-list");
+        }
+    } else {
+        if (auth.userDetail !== null && ["/", "/register"].includes(to.path)) {
+            return next("/app-list");
+        }
     }
-    // else {
-    //     if (auth.userDetail !== null && !auth.userDetail.is_2fa_enabled) {
-    //         return next("/app-list");
-    //     }
-    // }
 
     next();
 });

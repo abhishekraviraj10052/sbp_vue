@@ -16,9 +16,9 @@ return new class extends Migration
             $table->string('firstname');
             $table->string('lastname');
             $table->string('email')->unique();
-            $table->string('number');
+            $table->string('number')->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->enum('role', ['admin', 'user'])->default('user');
             $table->string('google2fa_secret')->nullable();
             $table->string('google2fa_backup_code')->nullable();

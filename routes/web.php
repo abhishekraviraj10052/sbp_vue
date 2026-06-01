@@ -11,6 +11,7 @@ use App\Http\Controllers\admin\MaintainenceModeController;
 use App\Http\Controllers\admin\RewardedAdsController;
 use App\Http\Controllers\admin\TwoFaController;
 use App\Http\Controllers\admin\UpgradeAppController;
+use App\Http\Controllers\admin\UserAccessController;
 use App\Http\Controllers\admin\VpnController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -92,18 +93,18 @@ Route::group(['prefix' => 'admin'],function(){
 
     //2Fa routes
     Route::post('2fa-generate',[TwoFaController::class,'generate_2fa_secret']);
-    Route::post('2fa-verify-otp',[TwoFaController::class,'verify_2fa_otp']);
-    Route::post('2fa-verify-login',[TwoFaController::class,'verify_2fa_login']);
+    Route::post('2fa-otp-verify',[TwoFaController::class,'verify_2fa_otp']);
+    Route::post('2fa-login',[TwoFaController::class,'two_fa_login']);
+    Route::post('2fa-login-with-backup-code',[TwoFaController::class,'two_fa_login_with_backup_code']);
+
 
     Route::post('2fa-disable',[TwoFaController::class,'disable_2fa']);
     Route::post('backup-code-reset',[TwoFaController::class,'reset_backup_code']);
     Route::post('backup-code-download',[TwoFaController::class,'download_backup_code']);
 
-
-
-
-    
-
+    Route::post('user-access-list',[UserAccessController::class,'list_user_access']);
+    Route::post('user-access-manage',[UserAccessController::class,'manage_user_access']);
+    Route::post('user-access-apps',[UserAccessController::class,'user_access_apps']);
 
 });
 

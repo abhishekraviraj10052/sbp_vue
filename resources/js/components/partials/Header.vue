@@ -40,13 +40,9 @@
                     </a>
                 </div>
                 <h4
-                    v-if="
-                        $route.name != 'app-list' &&
-                        $route.name != 'app-manage' &&
-                        $route.name != '2fa-manage'
-                    "
+                    v-if="!['app-list', 'app-manage', '2fa-manage','user-access-list','user-access-manage'].includes($route.name)"
                 >
-                    #{{ whmcs_service_id }}&nbsp{{ app_name }}
+                    <span class="mx-1">#{{ whmcs_service_id }}&nbsp{{ app_name }}</span>
                 </h4>
             </div>
             <div class="main-header-right">
@@ -416,6 +412,23 @@
                                             aria-hidden="true"
                                         ></i
                                         >2FA Settings</a
+                                    >
+                                    <a
+                                        class="dropdown-item"
+                                        href="javascript:;"
+                                        v-on:click="
+                                            () => {
+                                                this.$router.push({
+                                                    name: 'user-access-list',
+                                                });
+                                            }
+                                        "
+                                        style="cursor: pointer"
+                                        ><i
+                                            class="fas fa-users"
+                                            aria-hidden="true"
+                                        ></i
+                                        >User & Access</a
                                     >
                                     <a
                                         class="dropdown-item"

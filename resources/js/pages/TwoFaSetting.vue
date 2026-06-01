@@ -182,7 +182,7 @@ export default {
             e.preventDefault();
             this.disabled = true;
             axios
-                .post("admin/2fa-verify-otp", {
+                .post("admin/2fa-otp-verify", {
                     otp: this.otp,
                 })
                 .then((res) => {
