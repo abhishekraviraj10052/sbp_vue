@@ -120,7 +120,7 @@
                                 ]"
                                 href="javascript:void(0);"
                                 v-on:click="
-                                    this.$router.push({ name: 'app-list' })
+                                    this.$router.push({ name: 'user-access-list' })
                                 "
                             >
                                 Cancel
@@ -140,7 +140,7 @@ import BreadCrumb from "../components/bread_crumb/BreadCrumb.vue";
 import SuccessMessage from "../components/success_alert/SuccessMessage.vue";
 
 export default {
-    name: "AppManage",
+    name: "UserAccessManage",
     components: {
         BreadCrumb,
         SuccessMessage,
@@ -192,9 +192,9 @@ export default {
                             this.app_error = res.data.msg.apps[0];
                         }
                     } else {
-                        if (!this.form_data.id) {
-                           this.$router.push({ name: "user-access-list" });
-                        } 
+                        // if (!this.form_data.id) {
+                        //    this.$router.push({ name: "user-access-list" });
+                        // } 
                     }
                 });
         },

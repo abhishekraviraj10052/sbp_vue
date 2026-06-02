@@ -15,8 +15,7 @@
         </div>
         <ul
             class="side-menu"
-            v-if="$route.name == 'app-list' || $route.name == 'app-manage'"
-        >
+            v-if="['app-list', 'app-manage','2fa-manage','user-access-list','user-access-manage'].includes($route.name)">
             <li class="slide">
                 <a
                     class="side-menu__item active"

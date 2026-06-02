@@ -35,6 +35,8 @@ import UserAccessList from "../pages/UserAccessList.vue";
 
 import UserAccessManage from "../pages/UserAccessManage.vue";
 
+import UserAccessVerification from "../pages/UserAccessVerification.vue";
+
 const routes = [
     {
         path: "/",
@@ -173,6 +175,12 @@ const routes = [
         name: "user-access-manage",
         component: UserAccessManage,
         meta: { requiresAuth: true },
+    },
+    {
+        path: "/user-access-verify/:token",
+        name: "user-access-verify",
+        component: UserAccessVerification,
+        meta: { requiresAuth: false },
     },
 ];
 

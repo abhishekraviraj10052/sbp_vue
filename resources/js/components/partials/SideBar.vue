@@ -18,11 +18,6 @@ export default {
     components: {
         SideBarContent,
     },
-    data() {
-        return {
-            route_names: ["app-list", "app-manage"],
-        };
-    },
 };
 </script>
 <style scoped>
