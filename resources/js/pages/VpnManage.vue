@@ -4,18 +4,18 @@
         :crumb_data="
             form_data.id
                 ? [
-                      'my apps',
+                      'My apps',
                       '#' + whmcs_service_id + ' ' + app_name,
-                      'main dashboard',
-                      'dashboard ads',
-                      'edit',
+                      'Main Dashboard',
+                      'Dashboard Ads',
+                      'Edit',
                   ]
                 : [
-                      'my apps',
+                      'My apps',
                       '#' + whmcs_service_id + ' ' + app_name,
-                      'main dashboard',
-                      'dashboard ads',
-                      'add new',
+                      'Main Dashboard',
+                      'Dashboard Ads',
+                      'Add New',
                   ]
         "
         whose="app"
@@ -23,10 +23,10 @@
     <!-- /breadcrumb -->
     <!-- row -->
     <div class="row">
-        <div class="col-lg-6 col-xl-6 col-md-12 col-sm-12">
+        <div class="col-md-8">
             <div class="card box-shadow-0">
-                <div class="card-body pt-0">
-                    <form>
+                <div :class="['card-body pt-0', { 'text-center': isLoading }]">
+                    <form v-if="!isLoading">
                         <div class="form-group" bis_skin_checked="1">
                             <label for="inputtitle"
                                 >Title (Leave empty to keep file name as
@@ -104,6 +104,16 @@
                             </button>
                         </div>
                     </form>
+                    <div
+                        v-else
+                        :class="[
+                            'spinner-border text-primary',
+                            { 'mt-50': isLoading },
+                        ]"
+                        role="status"
+                    >
+                        <span class="sr-only text-dark">Loading...</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -135,6 +145,7 @@ export default {
             },
             file_error: "",
             disabled: false,
+            isLoading: false,
         };
     },
     methods: {
@@ -143,9 +154,13 @@ export default {
             console.log(this.form_data.file);
         },
         togglePassword() {
-            const passwordInput = document.getElementById("togglePassword").previousElementSibling;
+            const passwordInput =
+                document.getElementById(
+                    "togglePassword",
+                ).previousElementSibling;
             if (passwordInput) {
-                passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+                passwordInput.type =
+                    passwordInput.type === "password" ? "text" : "password";
             }
         },
         submit(e) {
@@ -191,11 +206,13 @@ export default {
 
         this.form_data.id = this.$route.params?.id;
         if (this.form_data.id) {
+            this.isLoading = true;
             axios
                 .post("/admin/vpn-edit", {
                     id: this.form_data.id,
                 })
                 .then((res) => {
+                    this.isLoading = false;
                     this.form_data.id = res.data.record.id;
                     this.form_data.title = res.data.record.title;
                     this.form_data.username = res.data.record.username;

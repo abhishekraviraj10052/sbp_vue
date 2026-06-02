@@ -3,9 +3,9 @@
     <div class="breadcrumb-header justify-content-between">
         <BreadCrumb
             :crumb_data="[
-                'my apps',
+                'My Apps',
                 '#' + whmcs_service_id + ' ' + app_name,
-                'main dashbaord',
+                'Main Dashbaord',
             ]"
         ></BreadCrumb>
     </div>

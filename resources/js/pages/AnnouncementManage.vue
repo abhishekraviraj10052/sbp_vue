@@ -23,14 +23,14 @@
     <!-- /breadcrumb -->
     <!-- row -->
     <div class="row">
-        <div class="col-lg-6 col-xl-6 col-md-12 col-sm-12">
+        <div class="col-md-8">
             <SuccessMessage
                 v-if="success_msg"
                 :success_msg="success_msg"
             ></SuccessMessage>
-            <div class="card box-shadow-0">
+            <div :class="['card box-shadow-0', { 'text-center': isLoading }]">
                 <div class="card-body pt-0">
-                    <form>
+                    <form v-if="!isLoading">
                         <div class="form-group">
                             <label>Title</label>
                             <input
@@ -70,7 +70,7 @@
                                 ]"
                                 v-on:click="submit($event)"
                             >
-                                {{ form_data.id ? "Update" : "Submit" }}
+                                {{ !disabled ? "Submit" : "Please wait..." }}
                             </button>
                             <button
                                 :class="[
@@ -88,6 +88,16 @@
                             </button>
                         </div>
                     </form>
+                    <div
+                        v-else
+                        :class="[
+                            'spinner-border text-primary',
+                            { 'mt-50': isLoading },
+                        ]"
+                        role="status"
+                    >
+                        <span class="sr-only text-dark">Loading...</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -119,6 +129,7 @@ export default {
             title_error: "",
             message_error: "",
             disabled: false,
+            isLoading: false,
             success_msg: "",
         };
     },
@@ -158,11 +169,13 @@ export default {
 
         this.form_data.id = this.$route.params?.id;
         if (this.form_data.id) {
+            this.isLoading = true;
             axios
                 .post("/admin/announcement-edit", {
                     id: this.form_data.id,
                 })
                 .then((res) => {
+                    this.isLoading = false;
                     this.form_data.id = res.data.record.id;
                     this.form_data.title = res.data.record.title;
                     this.form_data.message = res.data.record.message;
@@ -171,3 +184,8 @@ export default {
     },
 };
 </script>
+<style>
+.mt-50 {
+    margin-top: 50px;
+}
+</style>

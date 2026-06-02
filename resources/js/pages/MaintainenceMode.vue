@@ -2,10 +2,10 @@
 	<!-- breadcrumb -->
 	<BreadCrumb
 		:crumb_data="[
-			'my apps',
+			'My Apps',
 			'#' + whmcs_service_id + ' ' + app_name,
-			'maindashboard',
-			'maintainencemode',
+			'Maindashboard',
+			'Maintainencemode',
 		]"
 		whose="app"
 	></BreadCrumb>
@@ -17,7 +17,7 @@
 				v-if="success_msg"
 				:success_msg="success_msg"
 			></SuccessMessage>
-			<div class="card box-shadow-0 mt-5 pt-20">
+			<div class="card box-shadow-0 mt-2 pt-20">
 				<div class="card-body pt-0">
 					<form>
 						<div class="form-group">

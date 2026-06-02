@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Auth;
 
 
 
-
 class AppController extends Controller
 {
 
@@ -23,7 +22,7 @@ class AppController extends Controller
 
     public function list_app(Request $request){
        
-            $query = AppModel::query();
+            $query = $this->app_model->query();
             if ($request->search) {
                 
                 $query->where(function ($q) use ($request) {
@@ -37,7 +36,7 @@ class AppController extends Controller
             $sortDirection = $request->sort_direction ?? 'desc';
             $query->orderBy($sortField, $sortDirection);
 
-            $records = $query->paginate(10);
+            $records = $query->paginate(2);
             return response()->json([
                 'errors' => false,
                 'records' => $records

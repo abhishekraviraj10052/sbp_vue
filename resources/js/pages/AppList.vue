@@ -2,7 +2,7 @@
     <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <BreadCrumb
-            :crumb_data="['my apps', 'list']"
+            :crumb_data="['My Apps', 'List']"
             url="app-manage"
             :add_btn="true"
         ></BreadCrumb>
@@ -64,6 +64,13 @@
                                         class="cursor-pointer"
                                     >
                                         App ID
+                                        <i
+                                            :class="
+                                                sortDirection === 'asc'
+                                                    ? 'fas fa-arrow-up'
+                                                    : 'fas fa-arrow-down'
+                                            "
+                                        ></i>
                                     </th>
                                     <th>App Name</th>
                                     <th>App Type</th>
@@ -71,7 +78,7 @@
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody v-if="records.length == 0">
+                            <tbody v-if="records?.data?.length == 0">
                                 <tr v-if="isLoading">
                                     <td colspan="5" class="text-center">
                                         <div
@@ -105,27 +112,21 @@
                                 </tr>
                                 <AppRecords
                                     v-else
-                                    :records="records"
+                                    :records="records.data"
                                     :delete="delete"
                                 ></AppRecords>
                             </tbody>
                         </table>
                         <!-- Pagination -->
-                        <div class="text-center">
+                        <div v-if="records.links" class="text-center">
                             <button
-                                class="btn btn-primary mt-3 mb-0"
-                                :disabled="page === 1"
-                                @click="changePage(page - 1)"
-                            >
-                                Prev
-                            </button>
-                            <button
-                                class="btn btn-primary mt-3 mx-3 mb-0"
-                                :disabled="records.length == 0"
-                                @click="changePage(page + 1)"
-                            >
-                                Next
-                            </button>
+                                v-for="(link, index) in records.links"
+                                :key="index"
+                                v-on:click="changePage(getPage(link.url))"
+                                :disabled="!link.url"
+                                class="btn btn-primary mt-3 mb-0 mx-1"
+                                v-html="link.label"
+                            ></button>
                         </div>
                         <!-- Pagination -->
                     </div>
@@ -138,7 +139,6 @@
 
 <script>
 import axios from "axios";
-// import debounce from "lodash/debounce";
 import { useMessageStore } from "../stores/messageStore";
 
 import BreadCrumb from "../components/bread_crumb/BreadCrumb.vue";
@@ -177,13 +177,16 @@ export default {
                         sort_direction: this.sortDirection,
                     })
                     .then((res) => {
-                        this.records = res.data.records.data;
+                        this.records = res.data.records;
                         this.lastPage = res.data.last_page;
                         this.isLoading = false;
                     });
             } catch (error) {
                 console.log(error);
             }
+        },
+        getPage(url) {
+            return new URL(url).searchParams.get("page");
         },
         changePage(page) {
             this.page = page;
@@ -212,11 +215,13 @@ export default {
                 .then((res) => {
                     if (!res.data.errors) {
                         this.success_msg = res.data.msg;
-                        this.records = this.records.filter((record) => {
-                            if (record.id != id) {
-                                return record;
-                            }
-                        });
+                        this.records.data = this.records.data.filter(
+                            (record) => {
+                                if (record.id != id) {
+                                    return record;
+                                }
+                            },
+                        );
                     }
                 });
         },

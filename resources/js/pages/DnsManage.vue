@@ -4,18 +4,18 @@
         :crumb_data="
             form_data.id
                 ? [
-                      'my apps',
+                      'My Apps',
                       '#' + whmcs_service_id + ' ' + app_name,
-                      'maindashboard',
-                      'dns',
-                      'edit',
+                      'Maindashboard',
+                      'DNS',
+                      'Edit',
                   ]
                 : [
-                      'my apps',
+                      'My Apps',
                       '#' + whmcs_service_id + ' ' + app_name,
-                      'maindashboard',
-                      'dns',
-                      'add new',
+                      'Maindashboard',
+                      'DNS',
+                      'Add New',
                   ]
         "
         whose="app"
@@ -23,14 +23,14 @@
     <!-- /breadcrumb -->
     <!-- row -->
     <div class="row">
-        <div class="col-lg-6 col-xl-6 col-md-12 col-sm-12">
+        <div class="col-md-8">
             <SuccessMessage
                 v-if="success_msg"
                 :success_msg="success_msg"
             ></SuccessMessage>
             <div class="card box-shadow-0">
-                <div class="card-body pt-0">
-                    <form>
+                <div :class="['card-body pt-0', { 'text-center': isLoading }]">
+                    <form v-if="!isLoading">
                         <div class="form-group">
                             <label>Name</label>
                             <input
@@ -88,6 +88,16 @@
                             </button>
                         </div>
                     </form>
+                    <div
+                        v-else
+                        :class="[
+                            'spinner-border text-primary',
+                            { 'mt-50': isLoading },
+                        ]"
+                        role="status"
+                    >
+                        <span class="sr-only text-dark">Loading...</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -120,6 +130,7 @@ export default {
             dns_name_error: "",
             dns_value_error: "",
             disabled: false,
+            isLoading: false,
             success_msg: "",
         };
     },
@@ -157,11 +168,13 @@ export default {
 
         this.form_data.id = this.$route.params?.id;
         if (this.form_data.id) {
+            this.isLoading = true;
             axios
                 .post("/admin/dns-edit", {
                     id: this.form_data.id,
                 })
                 .then((res) => {
+                    this.isLoading = false;
                     this.form_data.id = res.data.record.id;
                     this.form_data.dns_name = res.data.record.name;
                     this.form_data.dns_value = res.data.record.dns;
@@ -170,3 +183,8 @@ export default {
     },
 };
 </script>
+<style>
+.mt-50 {
+    margin-top: 50px;
+}
+</style>

@@ -2,22 +2,22 @@
     <!-- breadcrumb -->
     <BreadCrumb
         :crumb_data="[
-            'my apps',
+            'My Apps',
             '#' + whmcs_service_id + ' ' + app_name,
-            'maindashboard',
-            'apk version',
+            'Maindashboard',
+            'Apk Version',
         ]"
         whose="app"
     ></BreadCrumb>
     <!-- /breadcrumb -->
     <!-- row -->
     <div class="row">
-        <div class="col-lg-6 col-xl-6 col-md-12 col-sm-12">
+        <div class="col-md-8">
             <SuccessMessage
                 v-if="success_msg"
                 :success_msg="success_msg"
             ></SuccessMessage>
-            <div class="card box-shadow-0 mt-5 pt-4">
+            <div class="card box-shadow-0 mt-2 pt-4">
                 <div class="card-body pt-0">
                     <form>
                         <div
@@ -65,7 +65,10 @@
                         <div v-show="has_apk_file" class="mt-3">
                             <span class=""> Current APK File :</span>
                             &nbsp;
-                            <i class="fa fa-download" v-on:click="handle_download(id)"></i>
+                            <i
+                                class="fa fa-download"
+                                v-on:click="handle_download(id)"
+                            ></i>
                             &nbsp;
                             <i
                                 class="fa fa-edit"

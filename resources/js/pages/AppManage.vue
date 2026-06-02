@@ -3,7 +3,7 @@
     <div class="breadcrumb-header justify-content-between">
         <BreadCrumb
             :crumb_data="
-                form_data.id ? ['My apps', 'edit'] : ['My aaps', 'add new']
+                form_data.id ? ['My Apps', 'Edit'] : ['My Apps', 'Add New']
             "
             whose="app"
         ></BreadCrumb>
@@ -17,8 +17,8 @@
                 :success_msg="success_msg"
             ></SuccessMessage>
             <div class="card box-shadow-0 pt-5">
-                <div class="card-body pt-0">
-                    <form>
+                <div :class="['card-body pt-0', { 'text-center': isLoading }]">
+                    <form v-if="!isLoading">
                         <div class="form-group">
                             <label>App name</label>
                             <input
@@ -85,6 +85,16 @@
                             </button>
                         </div>
                     </form>
+                    <div
+                        v-else
+                        :class="[
+                            'spinner-border text-primary',
+                            { 'mt-50': isLoading },
+                        ]"
+                        role="status"
+                    >
+                        <span class="sr-only text-dark">Loading...</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -115,6 +125,7 @@ export default {
             app_name_error: "",
             app_type_error: "",
             disabled: false,
+            isLoading: false,
             success_msg: "",
         };
     },
@@ -148,11 +159,13 @@ export default {
     mounted() {
         this.form_data.id = this.$route.params?.id;
         if (this.form_data.id) {
+            this.isLoading = true;
             axios
                 .post("/admin/app-edit", {
                     id: this.form_data.id,
                 })
                 .then((res) => {
+                    this.isLoading = false;
                     this.form_data.id = res.data.record.id;
                     this.form_data.app_name = res.data.record.title;
                     this.form_data.app_type = res.data.record.type;
@@ -165,3 +178,8 @@ export default {
     },
 };
 </script>
+<style>
+.mt-50 {
+    margin-top: 50px;
+}
+</style>
