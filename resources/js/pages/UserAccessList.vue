@@ -19,7 +19,8 @@
                                 });
                             }
                         "
-                        ><i class="fa fa-plus"></i>&nbsp&nbsp Invite New User & Access</a
+                        ><i class="fa fa-plus"></i>&nbsp&nbsp Invite New User &
+                        Access</a
                     >
                 </li>
             </ol>
@@ -64,6 +65,13 @@
                                         class="cursor-pointer"
                                     >
                                         ID
+                                        <i
+                                            :class="
+                                                sortDirection === 'asc'
+                                                    ? 'fas fa-arrow-up'
+                                                    : 'fas fa-arrow-down'
+                                            "
+                                        ></i>
                                     </th>
                                     <th>Email</th>
                                     <th>Apps</th>
@@ -71,7 +79,7 @@
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody v-if="records.length == 0">
+                            <tbody v-if="records?.data?.length == 0">
                                 <tr v-if="isLoading">
                                     <td colspan="5" class="text-center">
                                         <div
@@ -105,27 +113,21 @@
                                 </tr>
                                 <UserAccessRecords
                                     v-else
-                                    :records="records"
+                                    :records="records.data"
                                     :delete="delete"
                                 ></UserAccessRecords>
                             </tbody>
                         </table>
                         <!-- Pagination -->
-                        <div class="text-center">
+                        <div v-if="records.links" class="text-center">
                             <button
-                                class="btn btn-primary mt-3 mb-0"
-                                :disabled="page === 1"
-                                @click="changePage(page - 1)"
-                            >
-                                Prev
-                            </button>
-                            <button
-                                class="btn btn-primary mt-3 mx-3 mb-0"
-                                :disabled="records.length == 0"
-                                @click="changePage(page + 1)"
-                            >
-                                Next
-                            </button>
+                                v-for="(link, index) in records.links"
+                                :key="index"
+                                v-on:click="changePage(getPage(link.url))"
+                                :disabled="!link.url"
+                                class="btn btn-primary mt-3 mb-0 mx-1"
+                                v-html="link.label"
+                            ></button>
                         </div>
                         <!-- Pagination -->
                     </div>
@@ -177,13 +179,16 @@ export default {
                         sort_direction: this.sortDirection,
                     })
                     .then((res) => {
-                        this.records = res.data.records.data;
+                        this.records = res.data.records;
                         this.lastPage = res.data.last_page;
                         this.isLoading = false;
                     });
             } catch (error) {
                 console.log(error);
             }
+        },
+        getPage(url) {
+            return new URL(url).searchParams.get("page");
         },
         changePage(page) {
             this.page = page;
@@ -212,11 +217,13 @@ export default {
                 .then((res) => {
                     if (!res.data.errors) {
                         this.success_msg = res.data.msg;
-                        this.records = this.records.filter((record) => {
-                            if (record.id != id) {
-                                return record;
-                            }
-                        });
+                        this.records.data = this.records.data.filter(
+                            (record) => {
+                                if (record.id != id) {
+                                    return record;
+                                }
+                            },
+                        );
                     }
                 });
         },

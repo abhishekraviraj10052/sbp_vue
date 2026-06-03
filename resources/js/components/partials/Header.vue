@@ -414,6 +414,7 @@
                                         >2FA Settings</a
                                     >
                                     <a
+                                        v-if="role === 'admin'"
                                         class="dropdown-item"
                                         href="javascript:;"
                                         v-on:click="
@@ -457,6 +458,7 @@ export default {
     data() {
         return {
             username: "",
+            role: "",
             whmcs_service_id: "",
             app_name: "",
         };
@@ -483,6 +485,10 @@ export default {
         username() {
             const auth = useAuthStore();
             return auth.userDetail ? auth.userDetail.firstname : "User";
+        },
+        role() {
+            const auth = useAuthStore();
+            return auth.userDetail ? auth.userDetail.role : "user";
         },
         whmcs_service_id() {
             const auth = useAuthStore();

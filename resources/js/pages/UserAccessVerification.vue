@@ -34,6 +34,9 @@
                         </a>
                         <div class="card-sigin">
                             <!-- Demo content-->
+                              <div v-if="success_msg" class="alert alert-success">
+                                    {{ success_msg }}
+                                </div>
                             <div class="main-card-signin d-md-flex">
                                 <div class="wd-100p">
                                     <div class="">
@@ -48,36 +51,6 @@
                                                             id="tab5"
                                                         >
                                                             <form action="#">
-                                                                <div
-                                                                    class="form-group"
-                                                                >
-                                                                    <label
-                                                                        >Email</label
-                                                                    >
-                                                                    <input
-                                                                        :class="[
-                                                                            'form-control',
-                                                                            {
-                                                                                'border-danger':
-                                                                                    email_error,
-                                                                            },
-                                                                        ]"
-                                                                        v-model="
-                                                                            form_data.email
-                                                                        "
-                                                                        placeholder="Enter your email"
-                                                                        type="text"
-                                                                    />
-                                                                    <span
-                                                                        class="text-danger"
-                                                                        v-show="
-                                                                            email_error
-                                                                        "
-                                                                        >{{
-                                                                            email_error
-                                                                        }}</span
-                                                                    >
-                                                                </div>
                                                                 <div
                                                                     class="form-group"
                                                                 >
@@ -107,7 +80,50 @@
                                                                             cursor: pointer;
                                                                         "
                                                                         v-on:click="
-                                                                            togglePassword
+                                                                            togglePassword($event)
+                                                                        "
+                                                                    ></i>
+                                                                    <span
+                                                                        class="text-danger"
+                                                                        v-show="
+                                                                            password_error
+                                                                        "
+                                                                        >{{
+                                                                            password_error
+                                                                        }}</span
+                                                                    >
+                                                                </div>
+                                                                <div
+                                                                    class="form-group"
+                                                                >
+                                                                    <label
+                                                                        >Confirm
+                                                                        Password</label
+                                                                    >
+                                                                    <input
+                                                                        :class="[
+                                                                            'form-control',
+                                                                            {
+                                                                                'border-danger':
+                                                                                    password_confirmation_error,
+                                                                            },
+                                                                        ]"
+                                                                        v-model="
+                                                                            form_data.password_confirmation
+                                                                        "
+                                                                        placeholder="Confirm password"
+                                                                        :type="
+                                                                            text_type
+                                                                        "
+                                                                    />
+                                                                    <i
+                                                                        class="far fa-eye"
+                                                                        id="togglePassword"
+                                                                        style="
+                                                                            cursor: pointer;
+                                                                        "
+                                                                        v-on:click="
+                                                                            togglePassword($event)
                                                                         "
                                                                     ></i>
                                                                     <span
@@ -131,17 +147,17 @@
                                                                     {{
                                                                         disabled
                                                                             ? "Please wait..."
-                                                                            : "Sign In"
+                                                                            : "Submit"
                                                                     }}
                                                                 </button>
                                                             </form>
                                                             <div
-                                                                class="text-danger mt-2"
+                                                                class="alert alert-danger mt-2"
                                                                 v-show="
                                                                     auth_error
                                                                 "
                                                             >
-                                                                {{ auth_error }}
+                                                                <b>Error:</b><span class="mx-1">{{ auth_error }}</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -167,60 +183,79 @@
 
 <script>
 import axios from "axios";
-import { useAuthStore } from "../stores/auth";
+import { useMessageStore } from "../stores/messageStore";
 export default {
     name: "Login",
     data() {
         return {
             form_data: {
-                email: "",
+                user_id: "",
                 password: "",
+                password_confirmation: "",
             },
             text_type: "password",
-            email_error: "",
             password_error: "",
+            password_confirmation_error: "",
             auth_error: "",
             disabled: false,
             success_msg: "",
         };
     },
     methods: {
-        togglePassword() {
-            if (this.text_type === "password") {
-                this.text_type = "text";
-            } else {
-                this.text_type = "password";
-            }
+        togglePassword(e) {
+           e.target.previousElementSibling.type =
+                e.target.previousElementSibling.type === "password"
+                    ? "text"
+                    : "password";
+        },
+        validateToken(token) {
+            axios
+                .post("/token-validate", { token: token })
+                .then((res) => {
+                    if (!res.data.errors) {
+                        this.form_data.user_id = res.data.user_id;
+                        this.success_msg = res.data.msg;
+                    } else {
+                        this.auth_error = res.data.msg;
+                    }
+                })
+                .catch((error) => {
+                    this.auth_error =
+                        "An error occurred while validating the token.";
+                });
         },
         submit(e) {
             e.preventDefault();
             this.disabled = true;
-            this.email_error = "";
             this.password_error = "";
+            this.password_confirmation_error = "";
             this.auth_error = "";
-            const auth = useAuthStore();
-            auth.login(this.form_data).then((res) => {
-                this.disabled = false;
-                if (res.data.errors) {
-                    if (res.data.msg.email) {
-                        this.email_error = res.data.msg.email[0];
+            axios
+                .post("/password-create", this.form_data)
+                .then((res) => {
+                 this.disabled = false;;
+                    if (res.data.errors) {
+                        if (res.data.msg.password) {
+                            this.password_error = res.data.msg.password[0];
+                        }
+                        if (res.data.msg.password_confirmation) {
+                            this.password_confirmation_error = res.data.msg.password_confirmation[0];
+                        }
+                    } else {
+                        const success = useMessageStore();
+                        success.setMessage(res.data.msg);
+                        this.$router.push({ name: "login" });
                     }
-                    if (res.data.msg.password) {
-                        this.password_error = res.data.msg.password[0];
-                    }
-                    if (res.data.msg.auth_error) {
-                        this.auth_error = res.data.msg.auth_error;
-                    }
-                } else if (res.data.user?.is_2fa_enabled) {
-                    this.$router.push({ name: "2fa-login" });
-                } else {
-                    this.$router.push({ name: "app-list" });
-                }
-            });
+                })
+              
         },
     },
-   mounted() {
+    mounted() {
         document.body.classList.add("bg-primary");
+        let token = this.$route.params?.token;
+        if (token) {
+            this.validateToken(token);
+        }
     },
 };
 </script>

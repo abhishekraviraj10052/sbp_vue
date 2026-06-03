@@ -1,16 +1,7 @@
 <template>
     <tr v-for="(record, index) in records" :key="index">
-        <th
-            scope="row"
-            class="cursor-pointer"
-            v-on:click="this.redirectToAppDetail(record.id)"
-        >
-            #{{ record.id }}
-        </th>
-        <td
-            class="cursor-pointer"
-            v-on:click="this.redirectToAppDetail(record.id)"
-        >
+        <th scope="row" class="cursor-pointer">#{{ record.id }}</th>
+        <td class="cursor-pointer">
             {{ record.email }}
         </td>
         <td>
@@ -31,15 +22,22 @@
         </td>
         <td>
             <button
+                v-if="record.accesses?.[0]?.status === 'inactive'"
                 class="btn btn-success"
-                v-on:click="this.redirectToAppDetail(record.id)"
             >
-                Manage</button
-            ><button
+                Resend
+            </button>
+            <button
+                v-if="record.accesses?.[0]?.status === 'inactive'"
+                class="btn btn-success mx-1"
+            >
+                <i class="fa fa-link"></i>
+            </button>
+            <button
                 class="btn btn-success mx-1"
                 v-on:click="
                     this.$router.push({
-                        name: 'app-manage',
+                        name: 'user-access-manage',
                         params: { id: record.id },
                     })
                 "

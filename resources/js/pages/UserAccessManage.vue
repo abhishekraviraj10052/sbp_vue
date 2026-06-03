@@ -16,8 +16,11 @@
             ></SuccessMessage>
             <div class="card box-shadow-0 pt-5">
                 <div class="card-body pt-0">
+                    <div v-if="exception_error" class="alert alert-danger">
+                        {{ exception_error }}
+                    </div>
                     <form>
-                        <div class="form-group">
+                        <div v-if="!form_data.id" class="form-group">
                             <label>User Email</label>
                             <input
                                 type="text"
@@ -33,6 +36,12 @@
                             }}</span>
                         </div>
                         <div class="form-group">
+                            <label>User Email</label>
+                            <div>
+                                <b class="mx-1">{{ form_data.user_email }}</b>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label>Access</label>
                             <div class="d-flex">
                                 <div class="form-check">
@@ -42,7 +51,11 @@
                                             class="form-check-input"
                                             name="optradio"
                                             value="option1"
-                                            :checked="!specific_apps"
+                                            :checked="
+                                                !specific_apps ||
+                                                form_data.apps.length ===
+                                                    user_access_apps.length
+                                            "
                                             v-on:click="specific_apps = false"
                                         />
                                         All Apps
@@ -53,7 +66,12 @@
                                             class="form-check-input"
                                             name="optradio"
                                             value="option1"
-                                            :checked="specific_apps"
+                                            :checked="
+                                                specific_apps ||
+                                                (form_data.apps.length > 0 &&
+                                                    form_data.apps.length <
+                                                        user_access_apps.length)
+                                            "
                                             v-on:click="specific_apps = true"
                                         />
                                         Specific Apps
@@ -61,12 +79,29 @@
                                 </div>
                             </div>
                         </div>
-                        <div v-if="specific_apps" class="form-group">
+                        <div
+                            v-if="
+                                specific_apps ||
+                                (form_data.apps.length > 0 &&
+                                    form_data.apps.length <
+                                        user_access_apps.length)
+                            "
+                            class="form-group"
+                        >
                             <label>Select Apps</label>
                             <div class="row mg-t-12">
                                 <div class="col-lg-12 mg-t-10">
                                     <label>
-                                        <input type="checkbox" />
+                                        <input
+                                            type="checkbox"
+                                            :checked="
+                                                form_data.apps.length ===
+                                                user_access_apps.length
+                                            "
+                                            v-on:change="
+                                                handleSelectAll($event)
+                                            "
+                                        />
                                         <span
                                             style="font-weight: bold"
                                             class="mx-3"
@@ -90,6 +125,13 @@
                                                     app.id,
                                                 )
                                             "
+                                            :checked="
+                                                form_data.apps.includes(
+                                                    app.id,
+                                                ) ||
+                                                form_data.apps.length ===
+                                                    user_access_apps.length
+                                            "
                                         /><span class="mx-3"
                                             >#{{ app.id }} {{ app.title }}</span
                                         >
@@ -109,9 +151,20 @@
                                 ]"
                                 v-on:click="submit($event)"
                             >
-                                {{
-                                    !disabled ? "Send Invite" : "Please wait..."
-                                }}
+                                <span v-if="!form_data.id">
+                                    {{
+                                        !disabled
+                                            ? "Send Invite"
+                                            : "Please wait..."
+                                    }}</span
+                                >
+                                <span v-else>
+                                    {{
+                                        !disabled
+                                            ? "Update Access"
+                                            : "Please wait..."
+                                    }}</span
+                                >
                             </button>
                             <button
                                 :class="[
@@ -120,7 +173,9 @@
                                 ]"
                                 href="javascript:void(0);"
                                 v-on:click="
-                                    this.$router.push({ name: 'user-access-list' })
+                                    this.$router.push({
+                                        name: 'user-access-list',
+                                    })
                                 "
                             >
                                 Cancel
@@ -154,6 +209,7 @@ export default {
             },
 
             user_access_apps: [],
+            exception_error: "",
             user_email_error: "",
             app_error: "",
             specific_apps: false,
@@ -162,6 +218,16 @@ export default {
         };
     },
     methods: {
+        handleSelectAll(event) {
+            if (event.target.checked) {
+                this.form_data.apps = [];
+                this.form_data.apps = this.user_access_apps.map(
+                    (app) => app.id,
+                );
+            } else {
+                this.form_data.apps = [];
+            }
+        },
         handleAppSelection(event, app_id) {
             const checkbox = event.target;
             if (checkbox.checked) {
@@ -173,7 +239,6 @@ export default {
                     (id) => id !== app_id,
                 );
             }
-            console.log(this.form_data.apps);
         },
         submit(e) {
             e.preventDefault();
@@ -192,14 +257,27 @@ export default {
                             this.app_error = res.data.msg.apps[0];
                         }
                     } else {
-                        // if (!this.form_data.id) {
-                        //    this.$router.push({ name: "user-access-list" });
-                        // } 
+                        if (!this.form_data.id) {
+                            const success = useMessageStore();
+                            success.setMessage(res.data.msg);
+                            this.$router.push({ name: "user-access-list" });
+                        } else {
+                            this.success_msg = res.data.msg;
+                        }
                     }
+                })
+                .catch((err) => {
+                    this.disabled = false;
+                    this.exception_error =
+                        err.response?.data?.msg ||
+                        "An error occurred. Please try again.";
                 });
         },
     },
     mounted() {
+        axios.post("/admin/user-access-apps").then((res) => {
+            this.user_access_apps = res.data.apps;
+        });
         this.form_data.id = this.$route.params?.id;
         if (this.form_data.id) {
             axios
@@ -207,16 +285,10 @@ export default {
                     id: this.form_data.id,
                 })
                 .then((res) => {
-                    this.form_data.id = res.data.record.id;
-                    this.form_data.app_name = res.data.record.title;
-                    this.form_data.app_type = res.data.record.type;
+                    this.form_data.user_email = res.data.user_email;
+                    this.form_data.apps = res.data.assigned_apps;
                 });
         }
-
-        axios.post("/admin/user-access-apps").then((res) => {
-            this.user_access_apps = res.data.apps;
-            console.log(this.form_data.apps);
-        });
     },
 };
 </script>

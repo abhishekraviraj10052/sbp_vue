@@ -9,21 +9,23 @@ use App\Models\User;
 use App\Models\AppModel;
 use App\Models\UserAccessModel;
 use App\Models\UserAccessVerificationTokenModel;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 
 class UserAccessController extends Controller
 {
     public function list_user_access(Request $request)
     {
-       $query = User::with('accesses.app')->where('role', 'user');
+        $query = User::with('accesses.app')->where('role', 'user');
 
-       if ($request->search) {
+        if ($request->search) {
             $query->where(function ($q) use ($request) {
                 $q->where('email', 'like', '%' . $request->search . '%')
-                  ->orWhere('firstname', 'like', '%' . $request->search . '%')
-                  ->orWhere('lastname', 'like', '%' . $request->search . '%');
+                    ->orWhere('firstname', 'like', '%' . $request->search . '%')
+                    ->orWhere('lastname', 'like', '%' . $request->search . '%');
             });
         }
 
@@ -42,78 +44,125 @@ class UserAccessController extends Controller
 
     public function manage_user_access(Request $request)
     {
-        // $rules = [
-        //     'user_email' => 'required|email',
-        //     'apps' => 'required|array|min:1',
-        // ];
-
-        // $validator = Validator::make($request->all(),  [
-        //     'user_email' => 'required|email',
-        //     'apps' => 'required|array|min:1',
-        // ], [
-        //     'apps.required' => 'Please select at least one app.',
-        // ]);
-
-        // if ($validator->fails()) {
-        //     return response()->json([
-        //         'errors' => true,
-        //         'msg' => $validator->errors()
-        //     ]);
-        // }
-
-        // $user_id = '';
-        // $user = User::where('email', $request->user_email)->first();
-        // if (!$user) {
-        //     User::insert([
-        //         'firstname' => $request['user_email'],
-        //         'lastname' => $request['user_email'],
-        //         'email' => $request['user_email'],
-        //     ]);
-
-        //     $user_id = User::where('email', $request->user_email)->first()->id;
-        // } else {
-        //     $user_id = $user->id;
-        // }
-
-    
-        // foreach($request['apps'] as $app_id){
-        //     UserAccessModel::insert([
-        //         'user_id' => $user_id,
-        //         'whmcs_user_id' => auth()->user()->id,
-        //         'app_id' => $app_id,
-        //         'status' => 'inactive',
-        //     ]);
-        // }
-
-    // UserAccessVerificationTokenModel::insert([
-    //     'user_id' => 2,
-    //     'token' => 'testtoken1234567890',
-    // ]);   
-    $data = [
-        'name' => 'John Doe',
-        'verificationUrl' => 'http://127.0.0.1:8000/user-access-verify/testtoken1234567890',
-    ];
-
-    // Specify the recipient and send the mailable instance
-  try{
-      Mail::to('abhishek.ravi@techsmarters.com')->send(new WelcomeEmail($data));
-
-    // return 'Email has been sent successfully!';
 
 
+        $validator = Validator::make($request->all(),  [
+            'user_email' => 'required|email',
+            'apps' => 'required|array|min:1',
+        ], [
+            'apps.required' => 'Please select at least one app.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => true,
+                'msg' => $validator->errors()
+            ]);
+        }
+
+        $user_id = '';
+        $status = '';
+        $user = User::where('email', $request->user_email)->first();
+        if (!$user) {
+            User::insert([
+                'firstname' => $request['user_email'],
+                'lastname' => $request['user_email'],
+                'email' => $request['user_email'],
+            ]);
+
+            $user_id = User::where('email', $request->user_email)->first()->id;
+            $status = 'inactive';
+        } else {
+            $user_id = $user->id;
+            $status = 'active';
+        }
+
+
+        UserAccessModel::where('user_id', $user_id)->delete();
+        foreach ($request['apps'] as $app_id) {
+            UserAccessModel::insert([
+                'user_id' => $user_id,
+                'whmcs_user_id' => auth()->user()->id,
+                'app_id' => $app_id,
+                'status' => $status,
+            ]);
+        }
+
+        if ($status == 'inactive') {
+            $token = Str::random(15);
+            UserAccessVerificationTokenModel::insert([
+                'user_id' => $user_id,
+                'token' => md5($token),
+            ]);
+            $data = [
+                'name' => $request['user_email'],
+                'verificationUrl' => url('/') . '/user-access-verify/' . $token,
+            ];
+
+            try {
+
+                Mail::to($request['user_email'])->send(new WelcomeEmail($data));
+                return response()->json([
+                    'errors' => false,
+                    'msg' => 'Verification link has been sent successfully!'
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'errors' => true,
+                    'msg' => 'Failed to send verification link: ' . $e->getMessage()
+                ], 500);
+            }
+        }else{
+            return response()->json([
+                'errors' => false,
+                'msg' => 'User access updated successfully!'
+             ]);
+        }
+    }
+
+    public function validate_token(Request $request)
+    {
+
+        $record = UserAccessVerificationTokenModel::where('token', md5($request['token']))->first();
+        if ($record) {
+            UserAccessModel::where('user_id', $record->user_id)->update(['status' => 'active']);
+            return response()->json([
+                'errors' => false,
+                'user_id' => $record->user_id,
+                'msg' => 'Account activated successfully now create password!'
+            ]);
+        } else {
+            return response()->json([
+                'errors' => true,
+                'msg' => 'Invalid token!'
+            ]);
+        }
+    }
+
+    public function create_password(Request $request)
+    {
+        $validator = Validator::make($request->all(),  [
+            'user_id' => 'required|exists:users,id',
+            'password' => 'required|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => true,
+                'msg' => $validator->errors()
+            ]);
+        }
+
+        $user = User::where('id', $request['user_id'])->first();
+        $user->password = Hash::make($request['password']);
+        $user->save();
+
+        UserAccessVerificationTokenModel::where('user_id', $request['user_id'])->delete();
         return response()->json([
             'errors' => false,
-            'msg' => 'Email has been sent successfully!'
+            'msg' => 'Password created successfully'
         ]);
     }
-    catch(\Exception $e){
-    // return 'Failed to send email: ' . $e->getMessage();
-     return response()->json([
-            'errors' => false,
-            'msg' => 'Failed to send email: ' . $e->getMessage()
-        ]);
-    }
-  }
 
     public function user_access_apps()
     {
@@ -121,6 +170,19 @@ class UserAccessController extends Controller
         return response()->json([
             'errors' => false,
             'apps' => $apps
+        ]);
+    }
+
+
+    public function edit_user_access(Request $request)
+    {
+
+        $user = User::where('id', $request->id)->first();
+        $apps = UserAccessModel::where('user_id', $user->id)->pluck('app_id')->toArray();
+        return response()->json([
+            'errors' => false,
+            'user_email' => $user->email,
+            'assigned_apps' => $apps
         ]);
     }
 }
