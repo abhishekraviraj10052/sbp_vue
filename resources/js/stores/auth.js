@@ -21,7 +21,7 @@ export const useAuthStore = defineStore("auth", {
 
         async getUserDetail() {
             try {
-                const response = await axios.post("/admin/auth-check");
+                const response = await axios.post("/admin/get-user-detail");
                 if (!response.data.errors) {
                     this.userDetail = response.data.user;
                 } else {

@@ -42,7 +42,7 @@ const routes = [
         path: "/",
         name: "login",
         component: Login,
-        meta: { requiresGuest: true },
+        meta: { requiresAuth: false },
     },
     {
         path: "/app-list",
@@ -192,7 +192,15 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
     const auth = useAuthStore();
 
-    if (auth.userDetail === null) {
+    // if (auth.userDetail === null) {
+    //     try {
+    //         await auth.getUserDetail();
+    //     } catch (error) {
+    //         auth.userDetail = null;
+    //     }
+    //     console.log(auth.userDetail);
+    // }
+    if (auth.userDetail === null && (to.meta.requiresAuth || to.path === "/")) {
         try {
             await auth.getUserDetail();
         } catch (error) {
@@ -200,7 +208,8 @@ router.beforeEach(async (to, from, next) => {
         }
     }
 
-    if (auth.appDetail === null) {
+   
+    if (to.path !== "/" && auth.appDetail === null) {
         try {
             await auth.getAppDetail();
         } catch (error) {
@@ -213,18 +222,18 @@ router.beforeEach(async (to, from, next) => {
             return next("/");
         }
         if (
-            auth.userDetail.is_2fa_enabled &&
-            !auth.userDetail.is_2fa_verified &&
+            auth.userDetail?.is_2fa_enabled &&
+            !auth.userDetail?.is_2fa_verified &&
             to.path !== "/2fa-login"
         ) {
             return next("/2fa-login");
         }
         if (
-            (auth.userDetail.is_2fa_enabled &&
-                auth.userDetail.is_2fa_verified &&
+            (auth.userDetail?.is_2fa_enabled &&
+                auth.userDetail?.is_2fa_verified &&
                 to.path === "/2fa-login") ||
-            (!auth.userDetail.is_2fa_enabled &&
-                !auth.userDetail.is_2fa_verified &&
+            (!auth.userDetail?.is_2fa_enabled &&
+                !auth.userDetail?.is_2fa_verified &&
                 to.path === "/2fa-login")
         ) {
             return next("/app-list");

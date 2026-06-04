@@ -3,11 +3,11 @@
     <div class="breadcrumb-header justify-content-between">
         <BreadCrumb
             :crumb_data="[
-                'my apps',
+                'My Apps',
                 '#' + whmcs_service_id + ' ' + app_name,
-                'maindashboard',
-                'announcement',
-                'list',
+                'Maindashboard',
+                'Announcement',
+                'List',
             ]"
             url="announcement-manage"
             :add_btn="true"

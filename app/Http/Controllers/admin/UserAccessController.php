@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 
 class UserAccessController extends Controller
@@ -65,6 +66,7 @@ class UserAccessController extends Controller
         $user = User::where('email', $request->user_email)->first();
         if (!$user) {
             User::insert([
+                'whmcs_user_id' => Auth::user()->id,
                 'firstname' => $request['user_email'],
                 'lastname' => $request['user_email'],
                 'email' => $request['user_email'],
@@ -73,6 +75,7 @@ class UserAccessController extends Controller
             $user_id = User::where('email', $request->user_email)->first()->id;
             $status = 'inactive';
         } else {
+            $user->increment('permission_version');
             $user_id = $user->id;
             $status = 'active';
         }
@@ -82,8 +85,7 @@ class UserAccessController extends Controller
         foreach ($request['apps'] as $app_id) {
             UserAccessModel::insert([
                 'user_id' => $user_id,
-                'whmcs_user_id' => auth()->user()->id,
-                'app_id' => $app_id,
+                'whmcs_service_id' => $app_id,
                 'status' => $status,
             ]);
         }
@@ -178,7 +180,7 @@ class UserAccessController extends Controller
     {
 
         $user = User::where('id', $request->id)->first();
-        $apps = UserAccessModel::where('user_id', $user->id)->pluck('app_id')->toArray();
+        $apps = UserAccessModel::where('user_id', $user->id)->pluck('whmcs_service_id')->toArray();
         return response()->json([
             'errors' => false,
             'user_email' => $user->email,

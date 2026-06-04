@@ -6,7 +6,7 @@
         </td>
         <td>
             <span v-for="access in record.accesses" :key="access.app_id">
-                #{{ access?.app_id }} {{ access?.app?.title }}
+                #{{ access?.whmcs_service_id }} {{ access?.app?.title }}
                 <br />
             </span>
         </td>

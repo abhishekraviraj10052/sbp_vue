@@ -23,7 +23,7 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div class="form-group">
-								<label for="inputSMTPPort"
+								<label class="mb-3"
 									><b
 										>Choose where to save your Favorites,
 										Recently Watched, and Continue Watching
@@ -160,8 +160,8 @@ export default {
 		this.app_name = auth.appDetail ? auth.appDetail.title : null;
 
 		axios.post("/admin/app-storage-preference-status").then((res) => {
-			this.form_data.id = res.data.record.id;
-			this.form_data.mode = res.data.record.mode;
+			this.form_data.id = res?.data?.record?.id;
+			this.form_data.mode = res?.data?.record?.mode;
 		});
 	},
 };

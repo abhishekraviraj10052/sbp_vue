@@ -35,61 +35,14 @@
                                 user_email_error
                             }}</span>
                         </div>
-                        <div class="form-group">
+                        <div v-if="form_data.id" class="form-group">
                             <label>User Email</label>
                             <div>
                                 <b class="mx-1">{{ form_data.user_email }}</b>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>Access</label>
-                            <div class="d-flex">
-                                <div class="form-check">
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            class="form-check-input"
-                                            name="optradio"
-                                            value="option1"
-                                            :checked="
-                                                !specific_apps ||
-                                                form_data.apps.length ===
-                                                    user_access_apps.length
-                                            "
-                                            v-on:click="specific_apps = false"
-                                        />
-                                        All Apps
-                                    </label>
-                                    <label class="mx-5">
-                                        <input
-                                            type="radio"
-                                            class="form-check-input"
-                                            name="optradio"
-                                            value="option1"
-                                            :checked="
-                                                specific_apps ||
-                                                (form_data.apps.length > 0 &&
-                                                    form_data.apps.length <
-                                                        user_access_apps.length)
-                                            "
-                                            v-on:click="specific_apps = true"
-                                        />
-                                        Specific Apps
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                        <div
-                            v-if="
-                                specific_apps ||
-                                (form_data.apps.length > 0 &&
-                                    form_data.apps.length <
-                                        user_access_apps.length)
-                            "
-                            class="form-group"
-                        >
-                            <label>Select Apps</label>
-                            <div class="row mg-t-12">
+                            <div class="row mt-5">
                                 <div class="col-lg-12 mg-t-10">
                                     <label>
                                         <input
@@ -166,12 +119,12 @@
                                     }}</span
                                 >
                             </button>
-                            <button
+                            <a
                                 :class="[
                                     'btn btn-light mt-3 mb-0 mx-3',
                                     { disabled: disabled },
                                 ]"
-                                href="javascript:void(0);"
+                                href="javascript:;"
                                 v-on:click="
                                     this.$router.push({
                                         name: 'user-access-list',
@@ -179,7 +132,7 @@
                                 "
                             >
                                 Cancel
-                            </button>
+                            </a>
                         </div>
                     </form>
                 </div>
@@ -212,7 +165,6 @@ export default {
             exception_error: "",
             user_email_error: "",
             app_error: "",
-            specific_apps: false,
             disabled: false,
             success_msg: "",
         };

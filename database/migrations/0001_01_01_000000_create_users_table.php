@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('whmcs_user_id')->nullable();
+            $table->foreign('whmcs_user_id')->references('id')->on('users');
             $table->string('firstname');
             $table->string('lastname');
             $table->string('email')->unique();
@@ -20,6 +22,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             $table->enum('role', ['admin', 'user'])->default('user');
+            $table->unsignedBigInteger('permission_version')->default(1);
             $table->string('google2fa_secret')->nullable();
             $table->string('google2fa_backup_code')->nullable();
             $table->boolean('is_2fa_enabled')->default(false);

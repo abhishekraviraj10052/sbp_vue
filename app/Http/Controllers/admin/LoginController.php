@@ -27,6 +27,9 @@ class LoginController extends Controller
 
 
         if (Auth::attempt(['email' => $request['email'], 'password' => $request['password']])) {
+            if(Auth::user()->role == 'user'){
+                $request->session()->put('permission_version', Auth::user()->permission_version);
+            }
             return response()->json([
                 "errors" => false,
                 "user" => Auth::user()
@@ -40,7 +43,7 @@ class LoginController extends Controller
     }
 
 
-    public function authCheck(Request $request)
+    public function getUserDetail(Request $request)
     {
         if (Auth::check()) {
             Auth::user()->is_2fa_verified = $request->session()->get('is_2fa_verified')?true:false;

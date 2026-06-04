@@ -4,7 +4,7 @@
         v-if="
             !['login', '2fa-login'].includes($route.name) &&
             auth.userDetail !== null &&
-            (!auth.userDetail.is_2fa_enabled || auth.userDetail.is_2fa_verified)
+            (!auth.userDetail?.is_2fa_enabled || auth.userDetail?.is_2fa_verified)
         "
     ></Header>
     <!-- /main-header -->
@@ -14,7 +14,7 @@
         v-if="
             !['login', '2fa-login'].includes($route.name) &&
             auth.userDetail !== null &&
-            (!auth.userDetail.is_2fa_enabled || auth.userDetail.is_2fa_verified)
+            (!auth.userDetail?.is_2fa_enabled || auth.userDetail?.is_2fa_verified)
         "
     ></SideBar>
     <!-- main-sidebar -->
@@ -25,14 +25,14 @@
             'main-content':
                 !['login', '2fa-login'].includes($route.name) &&
                 auth.userDetail !== null &&
-                (!auth.userDetail.is_2fa_enabled ||
-                    auth.userDetail.is_2fa_verified),
+                (!auth.userDetail?.is_2fa_enabled ||
+                    auth.userDetail?.is_2fa_verified),
 
             'app-content':
                 !['login', '2fa-login'].includes($route.name) &&
                 auth.userDetail !== null &&
-                (!auth.userDetail.is_2fa_enabled ||
-                    auth.userDetail.is_2fa_verified),
+                (!auth.userDetail?.is_2fa_enabled ||
+                    auth.userDetail?.is_2fa_verified),
         }"
     >
         <!-- container -->
@@ -41,13 +41,13 @@
                 'main-container':
                     !['login', '2fa-login'].includes($route.name) &&
                     auth.userDetail !== null &&
-                    (!auth.userDetail.is_2fa_enabled ||
-                        auth.userDetail.is_2fa_verified),
+                    (!auth.userDetail?.is_2fa_enabled ||
+                        auth.userDetail?.is_2fa_verified),
                 'container-fluid':
                     !['login', '2fa-login'].includes($route.name) &&
                     auth.userDetail !== null &&
-                    (!auth.userDetail.is_2fa_enabled ||
-                        auth.userDetail.is_2fa_verified),
+                    (!auth.userDetail?.is_2fa_enabled ||
+                        auth.userDetail?.is_2fa_verified),
             }"
         >
             <router-view></router-view>
@@ -61,7 +61,7 @@
         v-if="
             !['login', '2fa-login'].includes($route.name) &&
             auth.userDetail !== null &&
-            (!auth.userDetail.is_2fa_enabled || auth.userDetail.is_2fa_verified)
+            (!auth.userDetail?.is_2fa_enabled || auth.userDetail?.is_2fa_verified)
         "
     ></SideBarRight>
     <!--/Sidebar-right-->
@@ -72,7 +72,7 @@
             !['login', '2fa-login'].includes($route.name) &&
             $route.name != '2fa-login' &&
             auth.userDetail !== null &&
-            (!auth.userDetail.is_2fa_enabled || auth.userDetail.is_2fa_verified)
+            (!auth.userDetail?.is_2fa_enabled || auth.userDetail?.is_2fa_verified)
         "
     ></MessageModel>
     <!-- /Message Modal -->
@@ -82,7 +82,7 @@
             !['login', '2fa-login'].includes($route.name) &&
             $route.name != '2fa-login' &&
             auth.userDetail !== null &&
-            (!auth.userDetail.is_2fa_enabled || auth.userDetail.is_2fa_verified)
+            (!auth.userDetail?.is_2fa_enabled || auth.userDetail?.is_2fa_verified)
         "
     ></Footer>
     <!-- Footer closed -->

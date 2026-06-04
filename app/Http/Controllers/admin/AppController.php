@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use App\Models\AppModel;
 use Illuminate\Support\Facades\Auth;
+use App\Models\UserAccessModel;
 
 
 
@@ -23,6 +24,12 @@ class AppController extends Controller
     public function list_app(Request $request){
        
             $query = $this->app_model->query();
+
+            if(Auth::user()->role == 'user'){
+                $request->session()->put('permission_version', Auth::user()->permission_version);
+                $apps = UserAccessModel::where('user_id',Auth::user()->id)->pluck('whmcs_service_id')->toArray();
+                $query->whereIn('id', $apps);
+            }
             if ($request->search) {
                 
                 $query->where(function ($q) use ($request) {

@@ -18,98 +18,105 @@ use Illuminate\Support\Facades\Route;
 
 
 
+
 Route::group(['prefix' => 'admin'], function () {
 
     Route::post('/', [LoginController::class, 'login']);
-    Route::post('logout', [LoginController::class, 'logout']);
-
-    Route::post('auth-check', [LoginController::class, 'authCheck']);
+    Route::post('get-user-detail', [LoginController::class, 'getUserDetail']);
     Route::post('get-app-detail', [LoginController::class, 'getAppDetail']);
 
-
-    //Dashboard routes
-    Route::post('app-detail', [DashboardController::class, 'index']);
-
-    //App routes
-    Route::post('app-list', [AppController::class, 'list_app']);
-    Route::post('app-manage', [AppController::class, 'manage_app']);
-    Route::post('app-edit', [AppController::class, 'edit_app']);
-    Route::post('app-delete', [AppController::class, 'delete_app']);
-    Route::post('app-types', [AppController::class, 'app_types']);
-
-    //Dns routes
-    Route::post('dns-list', [DnsController::class, 'list_dns']);
-    Route::post('dns-manage', [DnsController::class, 'manage_dns']);
-    Route::post('dns-edit', [DnsController::class, 'edit_dns']);
-    Route::post('dns-delete', [DnsController::class, 'delete_dns']);
+    Route::group(['middleware' => 'isLoggedIn'], function () {
 
 
-    //Announcement routes
-    Route::post('announcement-list', [AnnouncementController::class, 'list_announcements']);
-    Route::post('announcement-manage', [AnnouncementController::class, 'manage_announcements']);
-    Route::post('announcement-edit', [AnnouncementController::class, 'edit_announcement']);
-    Route::post('announcement-delete', [AnnouncementController::class, 'delete_announcement']);
+
+        Route::post('logout', [LoginController::class, 'logout']);
+        Route::post('app-list', [AppController::class, 'list_app']);
+
+        //2Fa routes
+        Route::post('2fa-generate', [TwoFaController::class, 'generate_2fa_secret']);
+        Route::post('2fa-otp-verify', [TwoFaController::class, 'verify_2fa_otp']);
+        Route::post('2fa-login', [TwoFaController::class, 'two_fa_login']);
+        Route::post('2fa-login-with-backup-code', [TwoFaController::class, 'two_fa_login_with_backup_code']);
+        Route::post('2fa-disable', [TwoFaController::class, 'disable_2fa']);
+        Route::post('backup-code-reset', [TwoFaController::class, 'reset_backup_code']);
+        Route::post('backup-code-download', [TwoFaController::class, 'download_backup_code']);
+
+        //User access routes
+        Route::post('user-access-list', [UserAccessController::class, 'list_user_access']);
+        Route::post('user-access-manage', [UserAccessController::class, 'manage_user_access']);
+        Route::post('user-access-apps', [UserAccessController::class, 'user_access_apps']);
+        Route::post('user-access-edit', [UserAccessController::class, 'edit_user_access']);
 
 
-    //Rewarded-ads routes
-    Route::post('rewarded-ads-list', [RewardedAdsController::class, 'list_rewarded_ads']);
-    Route::post('rewarded-ads-manage', [RewardedAdsController::class, 'manage_rewarded_ads']);
-    Route::post('rewarded-ads-edit', [RewardedAdsController::class, 'edit_rewarded_ads']);
-    Route::post('rewarded-ads-delete', [RewardedAdsController::class, 'delete_rewarded_ads']);
-    Route::post('rewarded-ads-image-delete', [RewardedAdsController::class, 'delete_image']);
-    Route::post('rewarded-ads-configure', [RewardedAdsController::class, 'configure_rewarded_ads']);
-    Route::post('rewarded-ads-configure-data', [RewardedAdsController::class, 'rewarded_ads_configuration_data']);
+        Route::group(['middleware' => 'checkUserPermission'], function () {
+
+            //Dashboard routes
+            Route::post('app-detail', [DashboardController::class, 'index']);
+
+            //App routes
+            Route::post('app-manage', [AppController::class, 'manage_app']);
+            Route::post('app-edit', [AppController::class, 'edit_app']);
+            Route::post('app-delete', [AppController::class, 'delete_app']);
+            Route::post('app-types', [AppController::class, 'app_types']);
+
+            //Dns routes
+            Route::post('dns-list', [DnsController::class, 'list_dns']);
+            Route::post('dns-manage', [DnsController::class, 'manage_dns']);
+            Route::post('dns-edit', [DnsController::class, 'edit_dns']);
+            Route::post('dns-delete', [DnsController::class, 'delete_dns']);
 
 
-    //Dashboard-ads routes
-    Route::post('dashboard-ads-list', [DashboardAdsController::class, 'list_dashboard_ads']);
-    Route::post('dashboard-ads-manage', [DashboardAdsController::class, 'manage_dashboard_ads']);
-    Route::post('dashboard-ads-edit', [DashboardAdsController::class, 'edit_dashboard_ads']);
-    Route::post('dashboard-ads-delete', [DashboardAdsController::class, 'delete_dashboard_ads']);
-    Route::post('dashboard-ads-image-delete', [DashboardAdsController::class, 'delete_image']);
-    Route::post('dashboard-ads-configure', [DashboardAdsController::class, 'configure_dashboard_ads']);
-    Route::post('dashboard-ads-configure-data', [DashboardAdsController::class, 'dashboard_ads_configuration_data']);
+            //Announcement routes
+            Route::post('announcement-list', [AnnouncementController::class, 'list_announcements']);
+            Route::post('announcement-manage', [AnnouncementController::class, 'manage_announcements']);
+            Route::post('announcement-edit', [AnnouncementController::class, 'edit_announcement']);
+            Route::post('announcement-delete', [AnnouncementController::class, 'delete_announcement']);
 
 
-    //Vpn routes
-    Route::post('vpn-list', [VpnController::class, 'list_vpn']);
-    Route::post('vpn-manage', [VpnController::class, 'manage_vpn']);
-    Route::post('vpn-edit', [VpnController::class, 'edit_vpn']);
-    Route::post('vpn-delete', [VpnController::class, 'delete_vpn']);
-    Route::get('vpn-download/{id}', [VpnController::class, 'downloadVpnFile']);
-
-    //Maintainence Mode
-    Route::post('maintainence-mode-manage', [MaintainenceModeController::class, 'manage_maintainence_mode']);
-    Route::post('maintainence-mode-status', [MaintainenceModeController::class, 'manage_maintainence_status']);
+            //Rewarded-ads routes
+            Route::post('rewarded-ads-list', [RewardedAdsController::class, 'list_rewarded_ads']);
+            Route::post('rewarded-ads-manage', [RewardedAdsController::class, 'manage_rewarded_ads']);
+            Route::post('rewarded-ads-edit', [RewardedAdsController::class, 'edit_rewarded_ads']);
+            Route::post('rewarded-ads-delete', [RewardedAdsController::class, 'delete_rewarded_ads']);
+            Route::post('rewarded-ads-image-delete', [RewardedAdsController::class, 'delete_image']);
+            Route::post('rewarded-ads-configure', [RewardedAdsController::class, 'configure_rewarded_ads']);
+            Route::post('rewarded-ads-configure-data', [RewardedAdsController::class, 'rewarded_ads_configuration_data']);
 
 
-    Route::post('app-storage-preference-manage', [AppStoragePreferenceController::class, 'manage_app_storage_preference']);
-    Route::post('app-storage-preference-status', [AppStoragePreferenceController::class, 'manage_app_storage_status']);
-
-    Route::any('app-version-manage', [UpgradeAppController::class, 'manage_app_version']);
-    Route::any('app-version-delete', [UpgradeAppController::class, 'delete_app_version']);
-    Route::get('apk-download/{id}', [UpgradeAppController::class, 'downloadApkFile']);
-
-
-    //2Fa routes
-    Route::post('2fa-generate', [TwoFaController::class, 'generate_2fa_secret']);
-    Route::post('2fa-otp-verify', [TwoFaController::class, 'verify_2fa_otp']);
-    Route::post('2fa-login', [TwoFaController::class, 'two_fa_login']);
-    Route::post('2fa-login-with-backup-code', [TwoFaController::class, 'two_fa_login_with_backup_code']);
+            //Dashboard-ads routes
+            Route::post('dashboard-ads-list', [DashboardAdsController::class, 'list_dashboard_ads']);
+            Route::post('dashboard-ads-manage', [DashboardAdsController::class, 'manage_dashboard_ads']);
+            Route::post('dashboard-ads-edit', [DashboardAdsController::class, 'edit_dashboard_ads']);
+            Route::post('dashboard-ads-delete', [DashboardAdsController::class, 'delete_dashboard_ads']);
+            Route::post('dashboard-ads-image-delete', [DashboardAdsController::class, 'delete_image']);
+            Route::post('dashboard-ads-configure', [DashboardAdsController::class, 'configure_dashboard_ads']);
+            Route::post('dashboard-ads-configure-data', [DashboardAdsController::class, 'dashboard_ads_configuration_data']);
 
 
-    Route::post('2fa-disable', [TwoFaController::class, 'disable_2fa']);
-    Route::post('backup-code-reset', [TwoFaController::class, 'reset_backup_code']);
-    Route::post('backup-code-download', [TwoFaController::class, 'download_backup_code']);
+            //Vpn routes
+            Route::post('vpn-list', [VpnController::class, 'list_vpn']);
+            Route::post('vpn-manage', [VpnController::class, 'manage_vpn']);
+            Route::post('vpn-edit', [VpnController::class, 'edit_vpn']);
+            Route::post('vpn-delete', [VpnController::class, 'delete_vpn']);
+            Route::get('vpn-download/{id}', [VpnController::class, 'downloadVpnFile']);
 
-    Route::post('user-access-list', [UserAccessController::class, 'list_user_access']);
-    Route::post('user-access-manage', [UserAccessController::class, 'manage_user_access']);
-    Route::post('user-access-apps', [UserAccessController::class, 'user_access_apps']);
-    Route::post('user-access-edit', [UserAccessController::class, 'edit_user_access']);
+            //Maintainence mode routes
+            Route::post('maintainence-mode-manage', [MaintainenceModeController::class, 'manage_maintainence_mode']);
+            Route::post('maintainence-mode-status', [MaintainenceModeController::class, 'manage_maintainence_status']);
+
+            //App storage preference routes
+            Route::post('app-storage-preference-manage', [AppStoragePreferenceController::class, 'manage_app_storage_preference']);
+            Route::post('app-storage-preference-status', [AppStoragePreferenceController::class, 'manage_app_storage_status']);
+
+            //Upgrade app routes
+            Route::any('app-version-manage', [UpgradeAppController::class, 'manage_app_version']);
+            Route::any('app-version-delete', [UpgradeAppController::class, 'delete_app_version']);
+            Route::get('apk-download/{id}', [UpgradeAppController::class, 'downloadApkFile']);
+        });
+    });
 });
 
-Route::post('token-validate', [UserAccessController::class, 'validate_token']);
-Route::post('password-create', [UserAccessController::class, 'create_password']);
+
 
 
 Route::get('/{any?}', function () {

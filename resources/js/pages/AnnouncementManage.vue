@@ -4,18 +4,18 @@
         :crumb_data="
             form_data.id
                 ? [
-                      'my apps',
+                      'My Apps',
                       '#' + whmcs_service_id + ' ' + app_name,
-                      'maindashboard',
-                      'announcement',
-                      'edit',
+                      'Maindashboard',
+                      'Announcement',
+                      'Edit',
                   ]
                 : [
-                      'my apps',
+                      'My Apps',
                       '#' + whmcs_service_id + ' ' + app_name,
-                      'maindashboard',
-                      'announcement',
-                      'add new',
+                      'Maindashboard',
+                      'Announcement',
+                      'Add New',
                   ]
         "
         whose="app"
