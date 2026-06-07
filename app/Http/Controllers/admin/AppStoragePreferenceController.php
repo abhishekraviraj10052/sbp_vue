@@ -18,7 +18,7 @@ class AppStoragePreferenceController extends Controller
         if($request['id'] == ''){
             if(AppStoragePreference::create([
                 'mode' => $request['mode'],
-                'whmcs_user_id' => Auth::user()->id,
+                'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                 'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
             ])){
                 return response()->json([
@@ -29,7 +29,7 @@ class AppStoragePreferenceController extends Controller
         }else{
             if(AppStoragePreference::where('id',$request['id'])->update([
                 'mode' => $request['mode'],
-                'whmcs_user_id' => Auth::user()->id,
+                'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                 'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
             ])){
                 return response()->json([

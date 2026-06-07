@@ -23,8 +23,9 @@ class AppController extends Controller
 
     public function list_app(Request $request){
        
-            $query = $this->app_model->query();
-
+            $whmcs_user_id = (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id;
+            $query = $this->app_model->where('whmcs_user_id',$whmcs_user_id);
+            
             if(Auth::user()->role == 'user'){
                 $request->session()->put('permission_version', Auth::user()->permission_version);
                 $apps = UserAccessModel::where('user_id',Auth::user()->id)->pluck('whmcs_service_id')->toArray();
@@ -68,7 +69,7 @@ class AppController extends Controller
                 if($this->app_model->create([
                     'title' => $request['app_name'],
                     'type' => $request['app_type'],
-                    'whmcs_user_id' => Auth::user()->id,
+                    'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                 ])){
                     return response()->json([
                         'errors' => false,
@@ -84,7 +85,7 @@ class AppController extends Controller
                 if($this->app_model->where('id',$request['id'])->update([
                     'title' => $request['app_name'],
                     'type' => $request['app_type'],
-                    'whmcs_user_id' => Auth::user()->id,
+                    'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                 ])){
                     return response()->json([
                         'errors' => false,

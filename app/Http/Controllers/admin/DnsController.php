@@ -19,7 +19,8 @@ class DnsController extends Controller
     }
 
     public function list_dns(Request $request){
-        $query = DnsModel::query();
+            $whmcs_user_id = (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id;
+            $query = DnsModel::where('whmcs_user_id',$whmcs_user_id)->where('whmcs_service_id',$request->session()->get('whmcs_service_id'));
             if ($request->search) {
                 
                 $query->where(function ($q) use ($request) {
@@ -58,7 +59,7 @@ class DnsController extends Controller
                 if($this->dns_model->create([
                     'name' => $request['dns_name'],
                     'dns' => $request['dns_value'],
-                    'whmcs_user_id' => Auth::user()->id,
+                    'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                     'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                 ])){
                     return response()->json([
@@ -75,7 +76,7 @@ class DnsController extends Controller
                 if($this->dns_model->where('id',$request['id'])->update([
                     'name' => $request['dns_name'],
                     'dns' => $request['dns_value'],
-                    'whmcs_user_id' => Auth::user()->id,
+                    'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                     'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                 ])){
                     return response()->json([

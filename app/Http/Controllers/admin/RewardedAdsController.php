@@ -23,7 +23,9 @@ class RewardedAdsController extends Controller
     public function list_rewarded_ads(Request $request)
     {
 
-            $query = RewardedAdsModel::query();
+            $whmcs_user_id = (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id;
+            $query = RewardedAdsModel::where('whmcs_user_id',$whmcs_user_id)->where('whmcs_service_id',$request->session()->get('whmcs_service_id'));
+            
             if ($request->search) {
                 
                 $query->where(function ($q) use ($request) {
@@ -120,7 +122,7 @@ class RewardedAdsController extends Controller
                 'text' => $request['message'] ?? '',
                 'status' => $request['status'] ?? 'active',
                 'redirect_link' => $request['redirect_link'] ?? '',
-                'whmcs_user_id' => Auth::user()->id,
+                'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                 'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
@@ -144,7 +146,7 @@ class RewardedAdsController extends Controller
                 'text' => $request['message'],
                 'status' => $request['status'] ?? 'active',
                 'redirect_link' => $request['redirect_link'] ?? '',
-                'whmcs_user_id' => Auth::user()->id,
+                'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                 'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
@@ -242,7 +244,7 @@ class RewardedAdsController extends Controller
                 ['setting' => $setting],
                 [
                     'value' => $value, 
-                    'whmcs_user_id' => Auth::user()->id,
+                    'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                     'whmcs_service_id' => $request->session()->get('whmcs_service_id')
                 ]
             );

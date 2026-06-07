@@ -21,7 +21,9 @@ class AnnouncementController extends Controller
 
     public function list_announcements(Request $request)
     {
-        $query = AnnouncementModel::query();
+
+        $whmcs_user_id = (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id;
+        $query = AnnouncementModel::where('whmcs_user_id',$whmcs_user_id)->where('whmcs_service_id',$request->session()->get('whmcs_service_id'));
         if ($request->search) {
             
             $query->where(function ($q) use ($request) {
@@ -61,7 +63,7 @@ class AnnouncementController extends Controller
             if ($this->announcement_model->create([
                 'title' => $request['title'],
                 'message' => $request['message'],
-                'whmcs_user_id' => Auth::user()->id,
+                'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                 'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
             ])) {
                 return response()->json([
@@ -78,7 +80,7 @@ class AnnouncementController extends Controller
             if ($this->announcement_model->where('id', $request['id'])->update([
                 'title' => $request['title'],
                 'message' => $request['message'],
-                'whmcs_user_id' => Auth::user()->id,
+                'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                 'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
             ])) {
                 return response()->json([

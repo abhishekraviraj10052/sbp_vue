@@ -24,7 +24,9 @@ class VpnController extends Controller
 
     public function list_vpn(Request $request)
     {
-        $query = VpnModel::query();
+        $whmcs_user_id = (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id;
+        $query = VpnModel::where('whmcs_user_id',$whmcs_user_id)->where('whmcs_service_id',$request->session()->get('whmcs_service_id'));
+        
         if ($request->search) {
 
             $query->where(function ($q) use ($request) {
@@ -120,7 +122,7 @@ class VpnController extends Controller
                         'password' => $password,
                         'shareable_password' => $shareable_password,
                         'file_content' => aes_encrypt($zip_content['file_content']),
-                        'whmcs_user_id' => Auth::user()->id,
+                        'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                         'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                         'created_at' => date('Y-m-d H:i:s'),
                         'updated_at' => date('Y-m-d H:i:s')
@@ -138,7 +140,7 @@ class VpnController extends Controller
                     'password' => $password,
                     'shareable_password' => $shareable_password,
                     'file_content' => aes_encrypt($fileContent),
-                    'whmcs_user_id' => Auth::user()->id,
+                    'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                     'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                     'created_at' => date('Y-m-d H:i:s'),
                     'updated_at' => date('Y-m-d H:i:s')
@@ -161,7 +163,7 @@ class VpnController extends Controller
                 'username' => $request['username'] ?? $vpn_record->username,
                 'password' => $password ?? $vpn_record->password,
                 'shareable_password' => $shareable_password ?? $vpn_record->shareable_password,
-                'whmcs_user_id' => Auth::user()->id,
+                'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                 'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                 'updated_at' => date('Y-m-d H:i:s')
             ])) {

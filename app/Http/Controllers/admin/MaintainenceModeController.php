@@ -36,7 +36,7 @@ class MaintainenceModeController extends Controller
                 if($this->MaintainenceModeModel->create([
                     'status' => ($request['status'])?'on':'off',
                     'message' => $request['message'],
-                    'whmcs_user_id' => Auth::user()->id,
+                    'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                     'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                 ])){
                     return response()->json([
@@ -53,7 +53,7 @@ class MaintainenceModeController extends Controller
                 if($this->MaintainenceModeModel->where('id',$request['id'])->update([
                     'status' => ($request['status'])?'on':'off',
                     'message' => $request['message'],
-                    'whmcs_user_id' => Auth::user()->id,
+                    'whmcs_user_id' => (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id,
                     'whmcs_service_id' => $request->session()->get('whmcs_service_id'),
                 ])){
                     return response()->json([
