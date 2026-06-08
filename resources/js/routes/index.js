@@ -36,6 +36,8 @@ import UserAccessList from "../pages/UserAccessList.vue";
 import UserAccessManage from "../pages/UserAccessManage.vue";
 
 import UserAccessVerification from "../pages/UserAccessVerification.vue";
+import NotificationList from "../pages/NotificationList.vue";
+import NotificationSend from "../pages/NotificationSend.vue";
 
 const routes = [
     {
@@ -182,6 +184,18 @@ const routes = [
         component: UserAccessVerification,
         meta: { requiresAuth: false },
     },
+    {
+        path: "/notification-list",
+        name: "notification-list",
+        component: NotificationList,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: "/notification-send",
+        name: "notification-send",
+        component: NotificationSend,
+        meta: { requiresAuth: true },
+    },
 ];
 
 const router = createRouter({
@@ -208,7 +222,6 @@ router.beforeEach(async (to, from, next) => {
         }
     }
 
-   
     if (to.path !== "/" && auth.appDetail === null) {
         try {
             await auth.getAppDetail();

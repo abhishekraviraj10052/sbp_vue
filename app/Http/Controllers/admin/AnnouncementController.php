@@ -25,7 +25,6 @@ class AnnouncementController extends Controller
         $whmcs_user_id = (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id;
         $query = AnnouncementModel::where('whmcs_user_id',$whmcs_user_id)->where('whmcs_service_id',$request->session()->get('whmcs_service_id'));
         if ($request->search) {
-            
             $query->where(function ($q) use ($request) {
                 $q->where('title', 'like', '%' . $request->search . '%')
                   ->orWhere('message', 'like', '%' . $request->search . '%');

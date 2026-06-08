@@ -84,7 +84,7 @@ class UpgradeAppController extends Controller
             $apkDetails = $this->getApkVersionDetails($finalPath);
 
             if (is_array($apkDetails)) {
-                $existingRecord = UpgradeAppModel::where('whmcs_user_id', $whmcs_user_id)->where('whmcs_service_id', $request->session()->get('whmcs_service_id'))->first();
+                $existingRecord = UpgradeAppModel::where('whmcs_user_id', (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id)->where('whmcs_service_id', $request->session()->get('whmcs_service_id'))->first();
                 if (!$existingRecord) {
                     UpgradeAppModel::insert([
                         'apk_file_name' => $fileName,
@@ -113,7 +113,7 @@ class UpgradeAppController extends Controller
                 ]);
             }
         } else {
-            $record = UpgradeAppModel::where('whmcs_user_id', Auth::user()->id)->where('whmcs_service_id', $request->session()->get('whmcs_service_id'))->first();
+            $record = UpgradeAppModel::where('whmcs_user_id', (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id)->where('whmcs_service_id', $request->session()->get('whmcs_service_id'))->first();
             return response()->json([
                 'record' => $record
             ]);
@@ -123,7 +123,7 @@ class UpgradeAppController extends Controller
     public function delete_app_version(Request $request)
     {
         if ($request->isMethod('post')) {
-            $record = UpgradeAppModel::where('whmcs_user_id', $whmcs_user_id)->where('whmcs_service_id', $request->session()->get('whmcs_service_id'))->first();
+            $record = UpgradeAppModel::where('whmcs_user_id', (Auth::user()->role == 'admin')?Auth::user()->id:Auth::user()->whmcs_user_id)->where('whmcs_service_id', $request->session()->get('whmcs_service_id'))->where('whmcs_service_id', $request->session()->get('whmcs_service_id'))->first();
             if ($record) {
                 $filePath = storage_path('app/uploads/apk_folder_' . $request->session()->get('whmcs_service_id') . '/' . $record->apk_file_name);
                 if (file_exists($filePath)) {

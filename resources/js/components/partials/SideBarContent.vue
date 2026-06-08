@@ -15,7 +15,16 @@
         </div>
         <ul
             class="side-menu"
-            v-if="['app-list', 'app-manage','2fa-manage','user-access-list','user-access-manage'].includes($route.name)">
+            v-if="
+                [
+                    'app-list',
+                    'app-manage',
+                    '2fa-manage',
+                    'user-access-list',
+                    'user-access-manage',
+                ].includes($route.name)
+            "
+        >
             <li class="slide">
                 <a
                     class="side-menu__item active"
@@ -186,7 +195,14 @@
                 <a
                     class="side-menu__item"
                     data-bs-toggle="slide"
-                    href="javascript:void(0);"
+                    href="javascript:;"
+                    v-on:click="
+                        () => {
+                            this.$router.push({
+                                name: 'notification-list',
+                            });
+                        }
+                    "
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
