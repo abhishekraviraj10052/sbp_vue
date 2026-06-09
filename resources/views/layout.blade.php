@@ -23,6 +23,7 @@
    <!---Skinmodes css-->
    <link href="{{asset('assets/css/skin-modes.css')}}" rel="stylesheet" />
    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase.js"></script>
 </head>
 
 <body class="ltr main-body app sidebar-mini">

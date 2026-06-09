@@ -6,6 +6,7 @@ use App\Http\Controllers\admin\DnsController;
 use App\Http\Controllers\admin\AnnouncementController;
 use App\Http\Controllers\admin\DashboardAdsController;
 use App\Http\Controllers\admin\DashboardController;
+use App\Http\Controllers\admin\FirebaseController;
 use App\Http\Controllers\admin\LoginController;
 use App\Http\Controllers\admin\MaintainenceModeController;
 use App\Http\Controllers\admin\RewardedAdsController;
@@ -26,8 +27,6 @@ Route::group(['prefix' => 'admin'], function () {
     Route::post('get-app-detail', [LoginController::class, 'getAppDetail']);
 
     Route::group(['middleware' => 'isLoggedIn'], function () {
-
-
 
         Route::post('logout', [LoginController::class, 'logout']);
         Route::post('app-list', [AppController::class, 'list_app']);
@@ -112,6 +111,10 @@ Route::group(['prefix' => 'admin'], function () {
             Route::any('app-version-manage', [UpgradeAppController::class, 'manage_app_version']);
             Route::any('app-version-delete', [UpgradeAppController::class, 'delete_app_version']);
             Route::get('apk-download/{id}', [UpgradeAppController::class, 'downloadApkFile']);
+
+            //Firebase routes
+            Route::post('fcm-token-save', [FirebaseController::class, 'save_token']);
+            Route::post('notification-send', [FirebaseController::class, 'send_notification']);
         });
     });
 });

@@ -7,14 +7,14 @@
                       'My Apps',
                       '#' + whmcs_service_id + ' ' + app_name,
                       'Maindashboard',
-                      'Notifications',
+                      'Notification',
                       'Send',
                   ]
                 : [
                       'My Apps',
                       '#' + whmcs_service_id + ' ' + app_name,
                       'Maindashboard',
-                      'Notifications',
+                      'Notification',
                       'Send',
                   ]
         "
@@ -30,6 +30,11 @@
             ></SuccessMessage>
             <div class="card box-shadow-0">
                 <div :class="['card-body pt-0', { 'text-center': isLoading }]">
+                    <div>
+                        <button @click="registerForPush">
+                            Enable Notifications
+                        </button>
+                    </div>
                     <form v-if="!isLoading">
                         <div class="form-group">
                             <label>Title</label>
@@ -57,15 +62,13 @@
                                 placeholder="Enter message"
                                 v-model="form_data.message"
                             ></textarea>
-                            <span
-                                class="text-danger"
-                                v-show="message_error"
-                                >{{ message_error }}</span
-                            >
+                            <span class="text-danger" v-show="message_error">{{
+                                message_error
+                            }}</span>
                         </div>
-                         <div class="form-group">
+                        <div class="form-group">
                             <label>Upload Image(optional)</label>
-                             <input type="file" class="form-control">
+                            <input type="file" class="form-control" />
                         </div>
                         <div class="form-group">
                             <button
@@ -116,6 +119,9 @@ import { useAuthStore } from "@/stores/auth";
 import BreadCrumb from "../components/bread_crumb/BreadCrumb.vue";
 import SuccessMessage from "../components/success_alert/SuccessMessage.vue";
 
+import { messaging } from "../firebase";
+import { getToken, onMessage } from "firebase/messaging";
+
 export default {
     name: "DnsManage",
     components: {
@@ -141,31 +147,80 @@ export default {
     methods: {
         submit(e) {
             e.preventDefault();
+
             this.disabled = true;
-            this.dns_name_error = "";
-            this.dns_value_error = "";
-            axios.post("/admin/notification-send", this.form_data).then((res) => {
-                this.disabled = false;
-                if (res.data.errors) {
-                    if (res.data.msg.title) {
-                        this.title_error = res.data.msg.title[0];
-                    }
-                    if (res.data.msg.message) {
-                        this.message_error = res.data.msg.message[0];
-                    }
-                } else {
-                    if (!this.form_data.id) {
-                        const success = useMessageStore();
-                        success.setMessage(res.data.msg);
-                        this.$router.push({ name: "dns-list" });
+            this.title_error = "";
+            this.message_error = "";
+
+            axios
+                .post("/admin/notification-send", this.form_data)
+                .then((res) => {
+                    this.disabled = false;
+
+                    if (res.data.errors) {
+                        if (res.data.msg.title) {
+                            this.title_error = res.data.msg.title[0];
+                        }
+
+                        if (res.data.msg.message) {
+                            this.message_error = res.data.msg.message[0];
+                        }
                     } else {
                         this.success_msg = res.data.msg;
+                        if (!this.form_data.id) {
+                            const success = useMessageStore();
+                            success.setMessage(res.data.msg);
+                            this.$router.push({
+                                name: "dns-list",
+                            });
+                        } else {
+                            this.success_msg = res.data.msg;
+                        }
                     }
+                });
+        },
+        async registerForPush() {
+            try {
+                const permission = await Notification.requestPermission();
+
+                if (permission !== "granted") {
+                    alert("Notification permission denied");
+                    return;
                 }
+
+                const token = await getToken(messaging, {
+                    vapidKey: "BHIVwahjh4tZ8jG3GKmEAunaOkhUIRos6gTtFRdBH1DkFrBRtJd8_ilOAFyVCjE2CxSFM08FGVA21_lS13pnpxs"
+                });
+
+                console.log("FCM Token:", token);
+
+                await axios.post("/admin/fcm-token-save", {
+                    token: token,
+                });
+
+                alert("Token saved successfully");
+            } catch (error) {
+                console.error("FCM Error:", error);
+            }
+        },
+
+        initializeForegroundListener() {
+            onMessage(messaging, (payload) => {
+                console.log("Message received:", payload);
+
+                const noteTitle = payload.notification?.title;
+
+                const noteOptions = {
+                    body: payload.notification?.body,
+                    icon: payload.notification?.icon,
+                };
+
+                new Notification(noteTitle, noteOptions);
             });
         },
     },
     mounted() {
+        this.initializeForegroundListener();
         const auth = useAuthStore();
         this.whmcs_service_id = auth.appDetail ? auth.appDetail.id : null;
         this.app_name = auth.appDetail ? auth.appDetail.title : null;
