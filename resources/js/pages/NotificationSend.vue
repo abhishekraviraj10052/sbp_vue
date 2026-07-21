@@ -167,15 +167,15 @@ export default {
                         }
                     } else {
                         this.success_msg = res.data.msg;
-                        if (!this.form_data.id) {
-                            const success = useMessageStore();
-                            success.setMessage(res.data.msg);
-                            this.$router.push({
-                                name: "dns-list",
-                            });
-                        } else {
-                            this.success_msg = res.data.msg;
-                        }
+                        // if (!this.form_data.id) {
+                        //     const success = useMessageStore();
+                        //     success.setMessage(res.data.msg);
+                        //     this.$router.push({
+                        //         name: "dns-list",
+                        //     });
+                        // } else {
+                        //     this.success_msg = res.data.msg;
+                        // }
                     }
                 });
         },

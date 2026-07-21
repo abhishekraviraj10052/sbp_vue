@@ -66,11 +66,8 @@ class FirebaseController extends Controller
             );
 
             $client->refreshTokenWithAssertion();
-
             $accessToken = $client->getAccessToken()['access_token'];
-
             $projectId = 'sbp-vue';
-
             $successCount = 0;
             $failedCount = 0;
 
