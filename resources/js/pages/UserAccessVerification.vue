@@ -50,7 +50,7 @@
                                                             class="tab-pane active"
                                                             id="tab5"
                                                         >
-                                                            <form action="#">
+                                                            <form action="#" v-if="show_form">
                                                                 <div
                                                                     class="form-group"
                                                                 >
@@ -198,6 +198,7 @@ export default {
             password_confirmation_error: "",
             auth_error: "",
             disabled: false,
+            show_form: false,
             success_msg: "",
         };
     },
@@ -215,6 +216,7 @@ export default {
                     if (!res.data.errors) {
                         this.form_data.user_id = res.data.user_id;
                         this.success_msg = res.data.msg;
+                        this.show_form = true;
                     } else {
                         this.auth_error = res.data.msg;
                     }
@@ -240,6 +242,9 @@ export default {
                         }
                         if (res.data.msg.password_confirmation) {
                             this.password_confirmation_error = res.data.msg.password_confirmation[0];
+                        }
+                        if (res.data.msg.auth_error) {
+                            this.auth_error = res.data.msg.auth_error;
                         }
                     } else {
                         const success = useMessageStore();

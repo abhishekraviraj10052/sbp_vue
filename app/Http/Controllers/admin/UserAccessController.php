@@ -77,7 +77,12 @@ class UserAccessController extends Controller
         } else {
             $user->increment('permission_version');
             $user_id = $user->id;
-            $status = 'active';
+            if($user->password == ''){
+                $status = 'inactive';
+            }else{
+                $status = 'active';
+            }
+            
         }
 
 
@@ -143,6 +148,7 @@ class UserAccessController extends Controller
 
     public function create_password(Request $request)
     {
+        
         $validator = Validator::make($request->all(),  [
             'user_id' => 'required|exists:users,id',
             'password' => 'required|confirmed',
@@ -194,7 +200,7 @@ class UserAccessController extends Controller
         $user = User::where('id', $request->id)->first();
         if ($user) {
             UserAccessModel::where('user_id', $user->id)->delete();
-            $user->delete();
+            // $user->delete();
             return response()->json([
                 'errors' => false,
                 'msg' => 'User access deleted successfully!'
