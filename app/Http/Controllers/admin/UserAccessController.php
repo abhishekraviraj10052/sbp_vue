@@ -187,4 +187,23 @@ class UserAccessController extends Controller
             'assigned_apps' => $apps
         ]);
     }
+
+
+    public function delete_user_access(Request $request)
+    {
+        $user = User::where('id', $request->id)->first();
+        if ($user) {
+            UserAccessModel::where('user_id', $user->id)->delete();
+            $user->delete();
+            return response()->json([
+                'errors' => false,
+                'msg' => 'User access deleted successfully!'
+            ]);
+        } else {
+            return response()->json([
+                'errors' => true,
+                'msg' => 'User not found!'
+            ]);
+        }
+    }
 }

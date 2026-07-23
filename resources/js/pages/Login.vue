@@ -35,6 +35,10 @@
                         <div class="card-sigin">
                             <!-- Demo content-->
                             <div class="main-card-signin d-md-flex">
+                                <SuccessMessage
+                                    v-if="success_msg"
+                                    :success_msg="success_msg"
+                                ></SuccessMessage>
                                 <div class="wd-100p">
                                     <div class="">
                                         <div class="main-signup-header">
@@ -167,7 +171,10 @@
 
 <script>
 import axios from "axios";
+import { useMessageStore } from "../stores/messageStore";
 import { useAuthStore } from "../stores/auth";
+import SuccessMessage from "../components/success_alert/SuccessMessage.vue";
+
 export default {
     name: "Login",
     data() {
@@ -218,6 +225,14 @@ export default {
                 }
             });
         },
+    },
+    mounted() {
+        this.isLoading = true;
+        const success = useMessageStore();
+        if (success.message) {
+            this.success_msg = success.message;
+            success.clearMessage();
+        }
     },
 };
 </script>

@@ -45,6 +45,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('user-access-manage', [UserAccessController::class, 'manage_user_access']);
         Route::post('user-access-apps', [UserAccessController::class, 'user_access_apps']);
         Route::post('user-access-edit', [UserAccessController::class, 'edit_user_access']);
+        Route::post('user-access-delete', [UserAccessController::class, 'delete_user_access']);
 
 
         Route::group(['middleware' => 'checkUserPermission'], function () {
@@ -118,6 +119,8 @@ Route::group(['prefix' => 'admin'], function () {
         });
     });
 });
+Route::post('token-validate', [UserAccessController::class, 'validate_token']);
+Route::post('password-create', [UserAccessController::class, 'create_password']);
 
 
 

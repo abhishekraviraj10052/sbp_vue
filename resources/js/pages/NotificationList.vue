@@ -1,160 +1,138 @@
 <template>
-    <!-- breadcrumb -->
-    <div class="breadcrumb-header justify-content-between">
-        <BreadCrumb
-            :crumb_data="[
-                'My Apps',
-                '#' + whmcs_service_id + ' ' + app_name,
-                'Maindashboard',
-                'Notifications',
-                'List',
-            ]"
-            url="dns-manage"
-            :add_btn="true"
-        ></BreadCrumb>
-    </div>
-    <!-- /breadcrumb -->
+  <!-- breadcrumb -->
+  <div class="breadcrumb-header justify-content-between">
+    <BreadCrumb
+      :crumb_data="[
+        'My Apps',
+        '#' + whmcs_service_id + ' ' + app_name,
+        'Maindashboard',
+        'Notifications',
+        'List',
+      ]"
+      url="dns-manage"
+      :add_btn="true"
+    ></BreadCrumb>
+  </div>
+  <!-- /breadcrumb -->
 
-    <!-- row -->
-    <div class="row">
-        <div class="col-xl-12">
-            <SuccessMessage
-                v-if="success_msg"
-                :success_msg="success_msg"
-            ></SuccessMessage>
-            <div class="card">
-                <div class="card-header pb-0">
-                    <div class="d-flex justify-content-between">
-                        <!-- <h4 class="card-title mg-b-0">My Apps</h4> -->
-                    </div>
-                </div>
-                <div class="d-flex justify-content-end flex-wrap gap-2">
-                    <button
-                        class="btn btn-primary text-white"
-                        v-on:click="
-                            () => {
-                                this.$router.push({
-                                    name: 'notification-send',
-                                });
-                            }
-                        "
-                    >
-                        <i class="fa fa-paper-plane"></i>&nbsp&nbspSend
-                        Notifications
-                    </button>
-                    <button class="btn btn-secondary text-white mx-1">
-                        <i class="fa fa-mobile"></i>&nbsp&nbspRegistered Device
-                    </button>
-                    <button
-                        href="javascript:void(0);"
-                        class="btn btn-warning text-white"
-                    >
-                        <i class="fa fa-check-circle"></i>&nbsp&nbspSent
-                        Notifications
-                    </button>
-                    <button
-                        href="javascript:void(0);"
-                        class="btn btn-primary text-white mx-1"
-                    >
-                        <i class="fa fa-cog"></i>&nbsp&nbspConfiguration
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <!-- Search -->
-                        <div class="d-flex justify-content-end mb-3">
-                            <!-- <div class="w-100 w-md-auto"> -->
-                            <input
-                                v-model="search"
-                                @input="searchData"
-                                placeholder="Search..."
-                                class="form-control w-300"
-                            />
-                            <!-- </div> -->
-                        </div>
-                        <!-- Search -->
-                        <table
-                            class="table table-bordered table-hover mb-0 text-md-nowrap"
-                        >
-                            <thead>
-                                <tr>
-                                    <th
-                                        class="cursor-pointer"
-                                        @click="sortBy('id')"
-                                    >
-                                        ID
-                                        <i
-                                            :class="
-                                                sortDirection === 'asc'
-                                                    ? 'fas fa-arrow-up'
-                                                    : 'fas fa-arrow-down'
-                                            "
-                                        ></i>
-                                    </th>
-                                    <th class="text-center">Title</th>
-                                    <th class="text-center">Message</th>
-                                    <th class="text-center">Image</th>
-                                    <th class="text-center">Created On</th>
-                                    <th class="text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody v-if="records?.data?.length == 0">
-                                <tr v-if="isLoading">
-                                    <td colspan="6" class="text-center">
-                                        <div
-                                            class="spinner-border text-primary"
-                                            role="status"
-                                        >
-                                            <span class="sr-only text-dark"
-                                                >Loading...</span
-                                            >
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr v-else>
-                                    <td colspan="6" class="text-center">
-                                        No records found
-                                    </td>
-                                </tr>
-                            </tbody>
-                            <tbody v-else>
-                                <tr v-if="isLoading">
-                                    <td colspan="6" class="text-center">
-                                        <div
-                                            class="spinner-border text-primary"
-                                            role="status"
-                                        >
-                                            <span class="sr-only text-dark"
-                                                >Loading...</span
-                                            >
-                                        </div>
-                                    </td>
-                                </tr>
-                                <NotificationRecords
-                                    v-else
-                                    :records="records.data"
-                                    :delete="delete"
-                                ></NotificationRecords>
-                            </tbody>
-                        </table>
-                        <!-- Pagination -->
-                        <div v-if="records.links" class="text-center">
-                            <button
-                                v-for="(link, index) in records.links"
-                                :key="index"
-                                v-on:click="changePage(getPage(link.url))"
-                                :disabled="!link.url"
-                                class="btn btn-primary mt-3 mb-0 mx-1"
-                                v-html="link.label"
-                            ></button>
-                        </div>
-                        <!-- Pagination -->
-                    </div>
-                </div>
-            </div>
+  <!-- row -->
+  <div class="row">
+    <div class="col-xl-12">
+      <SuccessMessage
+        v-if="success_msg"
+        :success_msg="success_msg"
+      ></SuccessMessage>
+      <div class="card">
+        <div class="card-header pb-0">
+          <div class="d-flex justify-content-between">
+            <!-- <h4 class="card-title mg-b-0">My Apps</h4> -->
+          </div>
         </div>
+        <div class="d-flex justify-content-end flex-wrap gap-2">
+          <button
+            class="btn btn-primary text-white"
+            v-on:click="
+              () => {
+                this.$router.push({
+                  name: 'notification-send',
+                });
+              }
+            "
+          >
+            <i class="fa fa-paper-plane"></i>&nbsp&nbspSend Notifications
+          </button>
+          <button class="btn btn-secondary text-white mx-1">
+            <i class="fa fa-mobile"></i>&nbsp&nbspRegistered Device
+          </button>
+          <button href="javascript:void(0);" class="btn btn-warning text-white">
+            <i class="fa fa-check-circle"></i>&nbsp&nbspSent Notifications
+          </button>
+          <button
+            href="javascript:void(0);"
+            class="btn btn-primary text-white mx-1"
+          >
+            <i class="fa fa-cog"></i>&nbsp&nbspConfiguration
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <!-- Search -->
+            <div class="d-flex justify-content-end mb-3">
+              <!-- <div class="w-100 w-md-auto"> -->
+              <input
+                v-model="search"
+                @input="searchData"
+                placeholder="Search..."
+                class="form-control w-300"
+              />
+              <!-- </div> -->
+            </div>
+            <!-- Search -->
+            <table class="table table-bordered table-hover mb-0 text-md-nowrap">
+              <thead>
+                <tr>
+                  <th class="cursor-pointer" @click="sortBy('id')">
+                    ID
+                    <i
+                      :class="
+                        sortDirection === 'asc'
+                          ? 'fas fa-arrow-up'
+                          : 'fas fa-arrow-down'
+                      "
+                    ></i>
+                  </th>
+                  <th class="text-center">Title</th>
+                  <th class="text-center">Message</th>
+                  <th class="text-center">Image</th>
+                  <th class="text-center">Created On</th>
+                  <th class="text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody v-if="records?.data?.length == 0">
+                <tr v-if="isLoading">
+                  <td colspan="6" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="sr-only text-dark">Loading...</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-else>
+                  <td colspan="6" class="text-center">No records found</td>
+                </tr>
+              </tbody>
+              <tbody v-else>
+                <tr v-if="isLoading">
+                  <td colspan="6" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="sr-only text-dark">Loading...</span>
+                    </div>
+                  </td>
+                </tr>
+                <NotificationRecords
+                  v-else
+                  :records="records.data"
+                  :delete="delete"
+                ></NotificationRecords>
+              </tbody>
+            </table>
+            <!-- Pagination -->
+            <div v-if="records.links" class="text-center">
+              <button
+                v-for="(link, index) in records.links"
+                :key="index"
+                v-on:click="changePage(getPage(link.url))"
+                :disabled="!link.url"
+                class="btn btn-primary mt-3 mb-0 mx-1"
+                v-html="link.label"
+              ></button>
+            </div>
+            <!-- Pagination -->
+          </div>
+        </div>
+      </div>
     </div>
-    <!-- row closed -->
+  </div>
+  <!-- row closed -->
 </template>
 
 <script>
@@ -166,106 +144,103 @@ import SuccessMessage from "../components/success_alert/SuccessMessage.vue";
 import NotificationRecords from "../components/NotificationRecords.vue";
 
 export default {
-    name: "NotificationList",
-    components: {
-        BreadCrumb,
-        SuccessMessage,
-        NotificationRecords,
-    },
-    data() {
-        return {
-            whmcs_service_id: "",
-            app_name: "",
-            isLoading: false,
-            success_msg: "",
-            records: [],
+  name: "NotificationList",
+  components: {
+    BreadCrumb,
+    SuccessMessage,
+    NotificationRecords,
+  },
+  data() {
+    return {
+      whmcs_service_id: "",
+      app_name: "",
+      isLoading: false,
+      success_msg: "",
+      records: [],
 
-            search: "",
-            page: 1,
-            lastPage: 1,
-            sortField: "id",
-            sortDirection: "desc",
-        };
-    },
-    methods: {
-        loadData() {
-            try {
-                this.isLoading = true;
-                axios
-                    .post("/admin/dns-list", {
-                        page: this.page,
-                        search: this.search,
-                        sort_field: this.sortField,
-                        sort_direction: this.sortDirection,
-                    })
-                    .then((res) => {
-                        this.records = res.data.records;
-                        this.lastPage = res.data.last_page;
-                        this.isLoading = false;
-                    });
-            } catch (error) {
-                console.log(error);
-            }
-        },
-        getPage(url) {
-            return new URL(url).searchParams.get("page");
-        },
-        changePage(page) {
-            this.page = page;
-            this.loadData();
-        },
-        sortBy(field) {
-            if (this.sortField === field) {
-                this.sortDirection =
-                    this.sortDirection === "asc" ? "desc" : "asc";
-            } else {
-                this.sortField = field;
-                this.sortDirection = "asc";
-            }
-
-            this.loadData();
-        },
-        searchData() {
-            this.page = 1;
-            this.loadData();
-        },
-        delete(id) {
-            axios
-                .post("/admin/dns-delete", {
-                    id: id,
-                })
-                .then((res) => {
-                    if (!res.data.errors) {
-                        this.success_msg = res.data.msg;
-                        this.records.data = this.records.data.filter(
-                            (record) => {
-                                if (record.id != id) {
-                                    return record;
-                                }
-                            },
-                        );
-                    }
-                });
-        },
-    },
-    mounted() {
-        const auth = useAuthStore();
-        this.whmcs_service_id = auth.appDetail ? auth.appDetail.id : null;
-        this.app_name = auth.appDetail ? auth.appDetail.title : null;
-
+      search: "",
+      page: 1,
+      lastPage: 1,
+      sortField: "id",
+      sortDirection: "desc",
+    };
+  },
+  methods: {
+    loadData() {
+      try {
         this.isLoading = true;
-        const success = useMessageStore();
-        if (success.message) {
-            this.has_success = true;
-            this.success_msg = success.message;
-            success.clearMessage();
-        }
-        this.loadData();
+        axios
+          .post("/admin/dns-list", {
+            page: this.page,
+            search: this.search,
+            sort_field: this.sortField,
+            sort_direction: this.sortDirection,
+          })
+          .then((res) => {
+            this.records = res.data.records;
+            this.lastPage = res.data.last_page;
+            this.isLoading = false;
+          });
+      } catch (error) {
+        console.log(error);
+      }
     },
+    getPage(url) {
+      return new URL(url).searchParams.get("page");
+    },
+    changePage(page) {
+      this.page = page;
+      this.loadData();
+    },
+    sortBy(field) {
+      if (this.sortField === field) {
+        this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+      } else {
+        this.sortField = field;
+        this.sortDirection = "asc";
+      }
+
+      this.loadData();
+    },
+    searchData() {
+      this.page = 1;
+      this.loadData();
+    },
+    delete(id) {
+      axios
+        .post("/admin/dns-delete", {
+          id: id,
+        })
+        .then((res) => {
+          if (!res.data.errors) {
+            this.success_msg = res.data.msg;
+            this.records.data = this.records.data.filter((record) => {
+              if (record.id != id) {
+                return record;
+              }
+            });
+          }
+        });
+    },
+  },
+  mounted() {
+    const auth = useAuthStore();
+    this.whmcs_service_id = auth.appDetail ? auth.appDetail.id : null;
+    this.app_name = auth.appDetail ? auth.appDetail.title : null;
+
+    this.isLoading = true;
+    const success = useMessageStore();
+    if (success.message) {
+      this.has_success = true;
+      this.success_msg = success.message;
+      success.clearMessage();
+    }
+    this.loadData();
+  },
 };
 </script>
 <style>
 .cursor-pointer {
-    cursor: pointer;
+  cursor: pointer;
 }
 </style>
