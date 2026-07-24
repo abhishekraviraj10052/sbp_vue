@@ -16,7 +16,7 @@ class checkUserPermission
     public function handle(Request $request, Closure $next): Response
     {
 
-       
+ 
         if (auth()->check() && auth()->user()->role == 'user') {
             
             $session_permission_version = $request->session()->get('permission_version');

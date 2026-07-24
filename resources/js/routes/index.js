@@ -204,16 +204,9 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
+
     const auth = useAuthStore();
 
-    // if (auth.userDetail === null) {
-    //     try {
-    //         await auth.getUserDetail();
-    //     } catch (error) {
-    //         auth.userDetail = null;
-    //     }
-    //     console.log(auth.userDetail);
-    // }
     if (auth.userDetail === null && (to.meta.requiresAuth || to.path === "/")) {
         try {
             await auth.getUserDetail();
@@ -233,6 +226,10 @@ router.beforeEach(async (to, from, next) => {
     if (to.meta.requiresAuth) {
         if (auth.userDetail === null) {
             return next("/");
+        }
+        if(auth.appDetail === null && !["/app-list"].includes(to.path)) {
+            
+            return next("/app-list");
         }
         if (
             auth.userDetail?.is_2fa_enabled &&

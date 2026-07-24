@@ -123,7 +123,7 @@ import { messaging } from "../firebase";
 import { getToken, onMessage } from "firebase/messaging";
 
 export default {
-    name: "DnsManage",
+    name: "NotificationSend",
     components: {
         BreadCrumb,
         SuccessMessage,
@@ -171,7 +171,7 @@ export default {
                         //     const success = useMessageStore();
                         //     success.setMessage(res.data.msg);
                         //     this.$router.push({
-                        //         name: "dns-list",
+                        //         name: "notification-list",
                         //     });
                         // } else {
                         //     this.success_msg = res.data.msg;
@@ -189,7 +189,8 @@ export default {
                 }
 
                 const token = await getToken(messaging, {
-                    vapidKey: "BHIVwahjh4tZ8jG3GKmEAunaOkhUIRos6gTtFRdBH1DkFrBRtJd8_ilOAFyVCjE2CxSFM08FGVA21_lS13pnpxs"
+                    vapidKey:
+                        "BHIVwahjh4tZ8jG3GKmEAunaOkhUIRos6gTtFRdBH1DkFrBRtJd8_ilOAFyVCjE2CxSFM08FGVA21_lS13pnpxs",
                 });
 
                 console.log("FCM Token:", token);
@@ -206,7 +207,7 @@ export default {
 
         initializeForegroundListener() {
             onMessage(messaging, (payload) => {
-                console.log("Message received:", payload);
+                console.log("Message received:", payload.notification);
 
                 const noteTitle = payload.notification?.title;
 
@@ -216,7 +217,10 @@ export default {
                 };
 
                 new Notification(noteTitle, noteOptions);
+              
             });
+
+           
         },
     },
     mounted() {

@@ -46,12 +46,8 @@ class UserAccessController extends Controller
     public function manage_user_access(Request $request)
     {
 
-
         $validator = Validator::make($request->all(),  [
             'user_email' => 'required|email',
-            'apps' => 'required|array|min:1',
-        ], [
-            'apps.required' => 'Please select at least one app.',
         ]);
 
         if ($validator->fails()) {
@@ -200,7 +196,7 @@ class UserAccessController extends Controller
         $user = User::where('id', $request->id)->first();
         if ($user) {
             UserAccessModel::where('user_id', $user->id)->delete();
-            // $user->delete();
+            $user->delete();
             return response()->json([
                 'errors' => false,
                 'msg' => 'User access deleted successfully!'
